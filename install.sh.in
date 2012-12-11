@@ -1,19 +1,19 @@
 #!/bin/sh
 
 export ROOT=`pwd`
-export JF_VERSION1="jellyfish-1.1.7beta"
-export JF_VERSION2="jellyfish-1.9.0beta"
-export SR_VERSION=`ls -d SuperReads*`
-export QR_VERSION=`ls -d quorum*`
-export NUM_THREADS=`cat /proc/cpuinfo |grep processor|wc -l`;
+export JF1_DIR=@jellyfish-1.1_DIR@
+export JF2_DIR=@jellyfish-2.0_DIR@
+export SR_DIR=@SuperReads_DIR@
+export QR_DIR=@quorum_DIR@
+export NUM_THREADS=`grep -c '^processor' /proc/cpuinfo`;
 export PKG_CONFIG_PATH=${ROOT}/lib/pkgconfig:$PKG_CONFIG_PATH;
 
-(cd CA/kmer;./configure.sh;make;make install)
-(cd CA/src;make)
-(cd $JF_VERSION1;./configure --prefix=$ROOT; make -j $NUM_THREADS  install;)
-(cd $JF_VERSION2;./configure --prefix=$ROOT; make -j $NUM_THREADS  install;)
-(cd $SR_VERSION;./configure --prefix=$ROOT; make -j $NUM_THREADS  install;)
-(cd $QR_VERSION;./configure --prefix=$ROOT; make -j $NUM_THREADS  install;)
+(cd CA/kmer; ./configure.sh; make; make install)
+(cd CA/src; make)
+(cd $JF1_DIR; ./configure --prefix=$ROOT; make -j $NUM_THREADS install)
+(cd $JF2_DIR; ./configure --prefix=$ROOT; make -j $NUM_THREADS install)
+(cd $SR_DIR; ./configure --prefix=$ROOT; make -j $NUM_THREADS install)
+(cd $QR_DIR; ./configure --prefix=$ROOT; make -j $NUM_THREADS install)
 
 echo "creating sr_config_example.txt with correct PATHS"
 cat > sr_config_example.txt <<EOF
