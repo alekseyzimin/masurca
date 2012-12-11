@@ -1,0 +1,15 @@
+[submodule "jellyfish-1.1"]
+	path = jellyfish-1.1
+	url = /software/distr/jellyfish
+[submodule "jellyfish-2.0"]
+	path = jellyfish-2.0
+	url = /software/distr/jellyfish
+[submodule "quorum"]
+	path = quorum
+	url = /software/distr/quorum
+[submodule "SuperReads"]
+	path = SuperReads
+	url = /software/distr/SuperReads
+[submodule "wgs"]
+	path = wgs
+	url = /software/distr/wgs
