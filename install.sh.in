@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 export ROOT=`pwd`
 export JF1_DIR=@jellyfish-1.1_DIR@
 export JF2_DIR=@jellyfish-2.0_DIR@
