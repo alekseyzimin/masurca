@@ -1,4 +1,5 @@
 # MaSurCA version
+NAME=MaSurCA
 VERSION = 1.9.2
 
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo)
@@ -45,7 +46,7 @@ $(foreach comp,$(COMPONENTS),$(eval $(call tarball_template,$(comp))))
 	sed $(foreach comp,$(COMPONENTS), -e 's/@$(comp)_DIR@/$($(comp)_DIR)/') $< > $@	
 	chmod a+rx $@
 
-DISTDIR = MaSurCA-$(VERSION)
+DISTDIR = $(NAME)-$(VERSION)
 $(DISTDIR).tar.gz: $(foreach comp,$(COMPONENTS),$(DISTDIR)/$($(comp)_DIR).tar.gz) $(DISTDIR)/CA.tar.gz $(DISTDIR)/install.sh
 	for i in $^; do case $$i in (*.tar.gz) tar -zxf $$i -C $(DISTDIR); (*) ;; esac; done
 	tar -zcf $@ --exclude='*.tar.gz' $(DISTDIR)
@@ -63,3 +64,42 @@ tests/$(DISTDIR): $(DISTDIR).tar.gz
 
 install: tests/$(DISTDIR)
 	cd $<; ./install.sh
+
+#########################################
+# Rules to create a static distribution #
+#########################################
+.PHONY: static
+STATICDIR=$(NAME)-$(VERSION)-static-$(shell uname -p)
+define Makefile_static_template =
+build-static/$(1)/Makefile: $(1)/configure
+	mkdir -p $$(dir $$@)
+	@conf=`readlink -f $$<`; ipath=`pwd`/build-static/install; echo $$$$conf; cd $$(dir $$@); $$$$conf --prefix=$$$$ipath --enable-all-static --enable-relative-paths --with-relative-jf-path PKG_CONFIG_PATH=$$$$ipath/lib/pkgconfig
+endef
+$(foreach comp,$(COMPONENTS),$(eval $(call Makefile_static_template,$(comp))))
+
+define build_static_template =
+build-static/$(1).installed: build-static/$(1)/Makefile
+	cd $$(dir $$<); make -j $(NCPU) install
+	touch $$@
+endef
+$(foreach comp,$(COMPONENTS),$(eval $(call build_static_template,$(comp))))
+
+build-static/CA/src/Makefile: build-static/CA.tar.gz
+	tar -zxf $< -C build-static
+
+build-static/CA.installed: build-static/CA/src/Makefile
+	cd build-static/CA/kmer; ./configure.sh; make; make install
+	cd build-static/CA/src; make ALL_STATIC=1
+	touch $@
+
+# SuperReads and Quorum rely on jellyfish being installed
+build-static/Quorum/Makefile: build-static/jellyfish-1.1.installed
+build-static/SuperReads/Makefile: build-static/jellyfish-1.1.installed build-static/jellyfish-2.0.installed
+
+$(STATICDIR).tar.gz: $(foreach comp,$(COMPONENTS),build-static/$(comp).installed) build-static/CA.installed
+	rm -rf $(STATICDIR); mkdir -p $(STATICDIR) $(STATICDIR)/Linux-amd64
+	cp -R build-static/install/bin $(STATICDIR)
+	cp -R build-static/CA/Linux-amd64/bin $(STATICDIR)/Linux-amd64
+	tar zcf $@ $(STATICDIR)
+
+static: $(STATICDIR).tar.gz
