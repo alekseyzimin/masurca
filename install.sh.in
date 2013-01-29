@@ -8,12 +8,15 @@ export JF2_DIR=@jellyfish-2.0_DIR@
 export SR_DIR=@SuperReads_DIR@
 export QR_DIR=@quorum_DIR@
 export NUM_THREADS=`grep -c '^processor' /proc/cpuinfo`;
-export PKG_CONFIG_PATH=${ROOT}/lib/pkgconfig:$PKG_CONFIG_PATH;
 
 (cd CA/kmer; ./configure.sh; make; make install)
 (cd CA/src; make)
 (cd $JF1_DIR; ./configure --prefix=$ROOT; make -j $NUM_THREADS install)
-(cd $JF2_DIR; ./configure --prefix=$ROOT; make -j $NUM_THREADS install)
+(cd $JF2_DIR; ./configure --prefix=$ROOT --program-suffix=-2.0; make -j $NUM_THREADS install)
+
+export PKG_CONFIG_PATH=$(make -s -C $JF1_DIR print-pkgconfigdir):$(make -s -C $JF2_DIR print-pkgconfigdir):$PKG_CONFIG_PATH
+export PATH=$(make -s -C $JF1_DIR print-bindir):$PATH
+
 (cd $SR_DIR; ./configure --prefix=$ROOT; make -j $NUM_THREADS install)
 (cd $QR_DIR; ./configure --prefix=$ROOT; make -j $NUM_THREADS install)
 

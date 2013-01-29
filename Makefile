@@ -1,6 +1,6 @@
 # MaSurCA version
 NAME=MaSurCA
-VERSION = 1.9.2
+VERSION = 1.9.4
 
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo)
 
@@ -94,7 +94,8 @@ build-static/CA.installed: build-static/CA/src/Makefile
 
 # SuperReads and Quorum rely on jellyfish being installed
 build-static/Quorum/Makefile: build-static/jellyfish-1.1.installed
-build-static/SuperReads/Makefile: build-static/jellyfish-1.1.installed build-static/jellyfish-2.0.installed
+build-static/SuperReads/Makefile: build-static/jellyfish-2.0.installed build-static/jellyfish-1.1.installed
+build-static/jellyfish-1.1.installed: build-static/jellyfish-2.0.installed
 
 $(STATICDIR).tar.gz: $(foreach comp,$(COMPONENTS),build-static/$(comp).installed) build-static/CA.installed
 	rm -rf $(STATICDIR); mkdir -p $(STATICDIR) $(STATICDIR)/Linux-amd64
