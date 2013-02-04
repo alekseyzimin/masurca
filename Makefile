@@ -1,5 +1,5 @@
 # MaSurCA version
-NAME=MaSurCA
+NAME=MaSuRCA
 VERSION = 1.9.4
 
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo)
@@ -20,6 +20,15 @@ versions:
 
 %/configure: %/configure.ac %/Makefile.am
 	cd $*; autoreconf -fi
+
+#############################################
+# Tag all components with MaSuRCA's version #
+#############################################
+tag:
+	git submodule foreach git tag -f $(NAME)-$(VERSION)
+	git tag -f $(NAME)-$(VERSION)
+	git submodule foreach git push --tags
+#	git foreach git push --tags
 
 ###########################################
 # Rules for making a tarball distribution #
