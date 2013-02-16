@@ -1,24 +1,30 @@
 #!/bin/sh
 
-set -e
+set -xe
 
 export ROOT=`pwd`
 export JF1_DIR=@jellyfish-1.1_DIR@
 export JF2_DIR=@jellyfish-2.0_DIR@
 export SR_DIR=@SuperReads_DIR@
 export QR_DIR=@quorum_DIR@
-export NUM_THREADS=`grep -c '^processor' /proc/cpuinfo`;
+export NUM_THREADS=`grep -c '^processor' /proc/cpuinfo || sysctl -n hw.ncpu`;
 
-(cd CA/kmer; ./configure.sh; make; make install)
-(cd CA/src; make)
-(cd $JF1_DIR; ./configure --prefix=$ROOT; make -j $NUM_THREADS install)
-(cd $JF2_DIR; ./configure --prefix=$ROOT --program-suffix=-2.0; make -j $NUM_THREADS install)
+(cd CA/kmer && ./configure.sh && make && make install)
+(cd CA/src && make)
+(cd $JF1_DIR && ./configure --prefix=$ROOT && make -j $NUM_THREADS install)
+(cd $JF2_DIR && ./configure --prefix=$ROOT --program-suffix=-2.0 && make -j $NUM_THREADS install)
 
 export PKG_CONFIG_PATH=$(make -s -C $JF1_DIR print-pkgconfigdir):$(make -s -C $JF2_DIR print-pkgconfigdir):$PKG_CONFIG_PATH
 export PATH=$(make -s -C $JF1_DIR print-bindir):$PATH
 
-(cd $SR_DIR; ./configure --prefix=$ROOT; make -j $NUM_THREADS install)
-(cd $QR_DIR; ./configure --prefix=$ROOT; make -j $NUM_THREADS install)
+JF2_INC=$(perl PkgConfig.pm --cflags jellyfish-2.0)
+JF2_LIB=$(perl PkgConfig.pm --libs jellyfish-2.0)
+(cd $SR_DIR && ./configure --prefix=$ROOT JELLYFISH_CFLAGS="$JF2_INC" JELLYFISH_LIBS="$JF2_LIB" && make -j $NUM_THREADS install)
+
+JF1_INC=$(perl PkgConfig.pm --cflags jellyfish-1.1)
+JF1_LIB=$(perl PkgConfig.pm --libs jellyfish-1.1)
+JF1=$(make -s -C $JF1_DIR print-bindir)/jellyfish
+(cd $QR_DIR && ./configure --prefix=$ROOT JELLYFISH_CFLAGS="$JF1_INC" JELLYFISH_LIBS="$JF1_LIB" JELLYFISH="$JF1" --enable-relative-paths --with-relative-jf-path && make -j $NUM_THREADS install)
 
 echo "creating sr_config_example.txt with correct PATHS"
 cat > sr_config_example.txt <<EOF

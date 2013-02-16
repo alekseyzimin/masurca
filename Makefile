@@ -55,8 +55,11 @@ $(foreach comp,$(COMPONENTS),$(eval $(call tarball_template,$(comp))))
 	sed $(foreach comp,$(COMPONENTS), -e 's/@$(comp)_DIR@/$($(comp)_DIR)/') $< > $@	
 	chmod a+rx $@
 
+%/PkgConfig.pm: PkgConfig.pm
+	cp $< $@
+
 DISTDIR = $(NAME)-$(VERSION)
-$(DISTDIR).tar.gz: $(foreach comp,$(COMPONENTS),$(DISTDIR)/$($(comp)_DIR).tar.gz) $(DISTDIR)/CA.tar.gz $(DISTDIR)/install.sh
+$(DISTDIR).tar.gz: $(foreach comp,$(COMPONENTS),$(DISTDIR)/$($(comp)_DIR).tar.gz) $(DISTDIR)/CA.tar.gz $(DISTDIR)/install.sh $(DISTDIR)/PkgConfig.pm
 	for i in $^; do case $$i in (*.tar.gz) tar -zxf $$i -C $(DISTDIR); (*) ;; esac; done
 	tar -zcf $@ --exclude='*.tar.gz' $(DISTDIR)
 
