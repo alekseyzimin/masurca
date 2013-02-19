@@ -57,6 +57,7 @@ $(foreach comp,$(COMPONENTS),$(eval $(call tarball_template,$(comp))))
 
 %/PkgConfig.pm: PkgConfig.pm
 	cp $< $@
+	chmod a+rx $@
 
 DISTDIR = $(NAME)-$(VERSION)
 $(DISTDIR).tar.gz: $(foreach comp,$(COMPONENTS),$(DISTDIR)/$($(comp)_DIR).tar.gz) $(DISTDIR)/CA.tar.gz $(DISTDIR)/install.sh $(DISTDIR)/PkgConfig.pm
