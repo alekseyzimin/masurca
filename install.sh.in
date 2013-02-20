@@ -2,38 +2,42 @@
 
 set -xe
 
-export ROOT=`pwd`
+ROOT=`pwd`
+[ -z "$DEST" ] && DEST="$ROOT"
 
-##################################
-# Check for gmake and pkg-config #
-##################################
+###################
+# Check for gmake #
+###################
 mkdir -p dist-bin
 PATH=$PATH:$ROOT/dist-bin
 which gmake >/dev/null 2>&1 || ln -s $(which make) $ROOT/dist-bin/gmake
-which pkg-config >/dev/null 2>&1 || ln -s $ROOT/PkgConfig.pm $ROOT/dist-bin/pkg-config
-
 
 export JF1_DIR=@jellyfish-1.1_DIR@
 export JF2_DIR=@jellyfish-2.0_DIR@
 export SR_DIR=@SuperReads_DIR@
 export QR_DIR=@quorum_DIR@
-export NUM_THREADS=`grep -c '^processor' /proc/cpuinfo || sysctl -n hw.ncpu`;
+export NUM_THREADS=`grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu`;
 
 (cd CA/kmer && ./configure.sh && make && make install)
 (cd CA/src && make)
-(cd $JF1_DIR && ./configure --prefix=$ROOT && make -j $NUM_THREADS install)
-(cd $JF2_DIR && ./configure --prefix=$ROOT --program-suffix=-2.0 && make -j $NUM_THREADS install)
+(cd $JF1_DIR && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
+(cd $JF2_DIR && ./configure --prefix=$DEST --program-suffix=-2.0 && make -j $NUM_THREADS install)
 
 export PKG_CONFIG_PATH=$(make -s -C $JF1_DIR print-pkgconfigdir):$(make -s -C $JF2_DIR print-pkgconfigdir):$PKG_CONFIG_PATH
-export PATH=$(make -s -C $JF1_DIR print-bindir):$PATH
+PATH=$(make -s -C $JF1_DIR print-bindir):$PATH
 
-(cd $SR_DIR && ./configure --prefix=$ROOT && make -j $NUM_THREADS install)
+# Define in case pkg-config does not exists
+export JELLYFISH_1_1_CFLAGS="$(./PkgConfig.pm --cflags jellyfish-1.1)"
+export JELLYFISH_1_1_LIBS="$(./PkgConfig.pm --libs jellyfish-1.1)"
+export JELLYFISH_2_0_CFLAGS="$(./PkgConfig.pm --cflags jellyfish-2.0)"
+export JELLYFISH_2_0_LIBS="$(./PKGConfig.pm --libs jellyfish-2.0)"
 
-JF1=$(make -s -C $JF1_DIR print-bindir)/jellyfish
-(cd $QR_DIR && ./configure --prefix=$ROOT --enable-relative-paths --with-relative-jf-path && make -j $NUM_THREADS install)
+(cd $SR_DIR && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
+
+(cd $QR_DIR && ./configure --prefix=$DEST --enable-relative-paths --with-relative-jf-path && make -j $NUM_THREADS install)
 
 echo "creating sr_config_example.txt with correct PATHS"
-cat > sr_config_example.txt <<EOF
+cat > $DEST/sr_config_example.txt <<EOF
 #example configuration file for rhodobacter sphaeroides assembly from GAGE project (http://gage.cbcb.umd.edu)
 #paths to installed components
 PATHS
