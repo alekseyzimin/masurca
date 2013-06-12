@@ -30,11 +30,16 @@ PATH=$(make -s -C $JF1_DIR print-bindir):$PATH
 export JELLYFISH_1_1_CFLAGS="$(./PkgConfig.pm --cflags jellyfish-1.1)"
 export JELLYFISH_1_1_LIBS="$(./PkgConfig.pm --libs jellyfish-1.1)"
 export JELLYFISH_2_0_CFLAGS="$(./PkgConfig.pm --cflags jellyfish-2.0)"
-export JELLYFISH_2_0_LIBS="$(./PKGConfig.pm --libs jellyfish-2.0)"
+export JELLYFISH_2_0_LIBS="$(./PkgConfig.pm --libs jellyfish-2.0)"
 
 (cd $SR_DIR && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
 
 (cd $QR_DIR && ./configure --prefix=$DEST --enable-relative-paths --with-relative-jf-path && make -j $NUM_THREADS install)
+
+############################################
+# Make executable relocatable if necessary #
+############################################
+
 
 echo "creating sr_config_example.txt with correct PATHS"
 cat > $DEST/sr_config_example.txt <<EOF
