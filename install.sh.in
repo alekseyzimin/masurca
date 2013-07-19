@@ -18,8 +18,6 @@ export SR_DIR=@SuperReads_DIR@
 export QR_DIR=@quorum_DIR@
 export NUM_THREADS=`grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu`;
 
-(cd CA/kmer && ./configure.sh && make && make install)
-(cd CA/src && make)
 (cd $JF1_DIR && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
 (cd $JF2_DIR && ./configure --prefix=$DEST --program-suffix=-2.0 && make -j $NUM_THREADS install)
 
@@ -32,8 +30,9 @@ export JELLYFISH_1_1_LIBS="$(./PkgConfig.pm --libs jellyfish-1.1)"
 export JELLYFISH_2_0_CFLAGS="$(./PkgConfig.pm --cflags jellyfish-2.0)"
 export JELLYFISH_2_0_LIBS="$(./PkgConfig.pm --libs jellyfish-2.0)"
 
+(cd CA/kmer && ./configure.sh && make && make install)
+(cd CA/src && make)
 (cd $SR_DIR && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
-
 (cd $QR_DIR && ./configure --prefix=$DEST --enable-relative-paths --with-relative-jf-path && make -j $NUM_THREADS install)
 
 ############################################
