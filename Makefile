@@ -1,6 +1,6 @@
 # MaSurCA version
 NAME=MaSuRCA
-VERSION = 2.0.3
+VERSION = 2.0.3.1
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo)
 
 # Component versions
