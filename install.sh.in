@@ -20,7 +20,7 @@ export NUM_THREADS=`grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl -n 
 
 (cd $JF1_DIR && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
 (cd $JF2_DIR && ./configure --prefix=$DEST --program-suffix=-2.0 && make -j $NUM_THREADS install)
-
+grep STRERROR_R $JF2_DIR/config.h > CA/src/AS_OVL/config.h
 export PKG_CONFIG_PATH=$(make -s -C $JF1_DIR print-pkgconfigdir):$(make -s -C $JF2_DIR print-pkgconfigdir):$PKG_CONFIG_PATH
 PATH=$(make -s -C $JF1_DIR print-bindir):$PATH
 
