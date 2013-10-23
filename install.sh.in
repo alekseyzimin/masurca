@@ -22,7 +22,8 @@ export NUM_THREADS=`grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl -n 
 (cd $JF2_DIR && ./configure --prefix=$DEST --program-suffix=-2.0 && make -j $NUM_THREADS install)
 
 export PKG_CONFIG_PATH=$(make -s -C $JF1_DIR print-pkgconfigdir):$(make -s -C $JF2_DIR print-pkgconfigdir):$PKG_CONFIG_PATH
-PATH=$(make -s -C $JF1_DIR print-bindir):$PATH
+PATH=$(make -s -C $JF2_DIR print-bindir):$PATH
+LIBDIR=$(make -s -C $JF2_DIR print-libdir)
 
 # Define in case pkg-config does not exists
 export JELLYFISH_1_1_CFLAGS="$(./PkgConfig.pm --cflags jellyfish-1.1)"
@@ -31,7 +32,7 @@ export JELLYFISH_2_0_CFLAGS="$(./PkgConfig.pm --cflags jellyfish-2.0)"
 export JELLYFISH_2_0_LIBS="$(./PkgConfig.pm --libs jellyfish-2.0)"
 
 (cd CA/kmer && ./configure.sh && make && make install)
-(cd CA/src && make)
+(cd CA/src && make LD_RUN_PATH="$LIBDIR")
 (cd $SR_DIR && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
 (cd $QR_DIR && ./configure --prefix=$DEST --enable-relative-paths --with-relative-jf-path && make -j $NUM_THREADS install)
 
