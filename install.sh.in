@@ -44,12 +44,6 @@ export JELLYFISH_2_0_LIBS="$(./PkgConfig.pm --libs jellyfish-2.0)"
 echo "creating sr_config_example.txt with correct PATHS"
 cat > $DEST/sr_config_example.txt <<EOF
 #example configuration file for rhodobacter sphaeroides assembly from GAGE project (http://gage.cbcb.umd.edu)
-#paths to installed components
-PATHS
-JELLYFISH_PATH=${ROOT}/bin
-SR_PATH=${ROOT}/bin
-CA_PATH=${ROOT}/CA/Linux-amd64/bin
-END
 
 #DATA is specified as type {PE,JUMP,OTHER}= two_letter_prefix mean stdev fastq(.gz)_fwd_reads fastq(.gz)_rev_reads
 #NOTE that PE reads are always assumed to be  innies, i.e. --->  <---, and JUMP are assumed to be outties <---    --->; if there are any jump libraries that are innies, such as longjump, specify them as JUMP and specify NEGATIVE mean
@@ -64,8 +58,8 @@ END
 PARAMETERS
 #this is k-mer size for deBruijn graph values between 25 and 101 are supported, auto will compute the optimal size based on the read data and GC content
 GRAPH_KMER_SIZE=auto
-#set this to 1 for Illumina-only assemblies and to 0 if you have 2x or more long (Sanger, 454) reads
-USE_LINKING_MATES=1
+#set this to 1 for Illumina-only assemblies and to 0 if you have 1x or more long (Sanger, 454) reads, you can also set this to 0 for large data sets with high jumping clone coverage, e.g. >50x
+USE_LINKING_MATES=0
 #this parameter is useful if you have too many jumping library mates. Typically set it to 60 for bacteria and something large (300) for mammals
 LIMIT_JUMP_COVERAGE = 60
 #these are the additional parameters to Celera Assembler.  do not worry about performance, number or processors or batch sizes -- these are computed automatically. for mammals do not set cgwErrorRate above 0.15!!!
