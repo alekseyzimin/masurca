@@ -61,6 +61,7 @@ $(DEST)/CA: wgs/build-default/tup.config wgs/.tup/db
 	mkdir -p $(DEST)/inst/CA/Linux-amd64; rsync -a $@/bin $(DEST)/inst/CA/Linux-amd64
 
 wgs/build-default/tup.config:
+	mkdir -p $(dir $@)
 	(echo "CONFIG_CXXFLAGS=-Wno-error=format -Wno-error=unused-function -Wno-error=unused-variable"; \
 	 echo "CONFIG_KMER=$(PWD)/wgs/kmer/Linux-amd64") > $@
 
