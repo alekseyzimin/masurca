@@ -31,22 +31,22 @@ make_install = $(MAKE) -C $@ install INSTALL="$(UPD_INSTALL)"
 
 subdirs: $(SUBDIRS)
 
-$(DEST)/jellyfish2:
+$(DEST)/jellyfish2: jellyfish-2.0/configure
 	mkdir -p $@
 	$(call check_config,jellyfish-2.0,--program-suffix=-2.0)
 	$(call make_install)
 
-$(DEST)/jellyfish1:
+$(DEST)/jellyfish1: jellyfish-1.1/configure
 	mkdir -p $@
 	$(call check_config,jellyfish-1.1,)
 	$(call make_install)
 
-$(DEST)/SuperReads:
+$(DEST)/SuperReads: SuperReads/configure
 	mkdir -p $@
 	$(call check_config,SuperReads,PKG_CONFIG_PATH=$(shell make -s -C $(DEST)/jellyfish2 print-pkgconfigdir))
 	$(call make_install)
 
-$(DEST)/quorum:
+$(DEST)/quorum: quorum/configure
 	mkdir -p $@
 	$(call check_config,quorum,--with-relative-jf-path --enable-relative-paths PKG_CONFIG_PATH=$(shell make -s -C $(DEST)/jellyfish1 print-pkgconfigdir))
 	$(call make_install)
