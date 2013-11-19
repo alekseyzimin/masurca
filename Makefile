@@ -26,7 +26,7 @@ PWD = $(shell pwd)
 DEST = $(PWD)/build
 SUBDIRS = $(foreach i,jellyfish2 jellyfish1 SuperReads quorum CA_kmer CA,$(DEST)/$(i))
 check_config = test -f $@/Makefile -a $@/Makefile -nt $(1)/configure.ac || (cd $@; $(PWD)/$(1)/configure --prefix=$(DEST)/inst $(2))
-make_install = $(MAKE) -C $@ install INSTALL="$(UPD_INSTALL)"
+make_install = $(MAKE) -C $@ -j $(NCPU) install INSTALL="$(UPD_INSTALL)"
 .PHONY: subdirs $(SUBDIRS)
 
 subdirs: $(SUBDIRS)
@@ -55,12 +55,17 @@ $(DEST)/CA_kmer:
 	test -f $@/Makefile || (ln -sf $(PWD)/wgs/kmer $@; cd $@; ./configure.sh)
 	cd $@; make; make install
 
-$(DEST)/CA:
+$(DEST)/CA: wgs/build-default/tup.config wgs/.tup/db
 	test -d $@ || (mkdir -p $(PWD)/wgs/build-default; ln -sf $(PWD)/wgs/build-default $@)
-	test -f $@/tup.config || (cd $@; (echo "CONFIG_CXXFLAGS=-Wno-error=format -Wno-error=unused-function -Wno-error=unused-variable"; echo "CONFIG_KMER=$(PWD)/wgs/kmer/Linux-amd64") > tup.config)
-	test -d $(PWD)/wgs/.tup || (cd $(PWD)/wgs; tup init)
 	cd $@; tup upd
 	mkdir -p $(DEST)/inst/CA/Linux-amd64; rsync -a $@/bin $(DEST)/inst/CA/Linux-amd64
+
+wgs/build-default/tup.config:
+	(echo "CONFIG_CXXFLAGS=-Wno-error=format -Wno-error=unused-function -Wno-error=unused-variable"; \
+	 echo "CONFIG_KMER=$(PWD)/wgs/kmer/Linux-amd64") > $@
+
+%/.tup/db:
+	cd $*; tup init
 
 %/configure: %/configure.ac %/Makefile.am
 	cd $*; autoreconf -fi
