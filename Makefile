@@ -12,13 +12,66 @@ jellyfish-2.0_DIR = jellyfish-$(jellyfish-2.0_VERSION)
 SuperReads_DIR = SuperReads-$(SuperReads_VERSION)
 quorum_DIR = quorum-$(quorum_VERSION)
 
+##################################################################
+# Rules for compilling a working distribution in build (or DEST) #
+##################################################################
+UPD_INSTALL = $(shell which install) -C
+PWD = $(shell pwd)
+DEST = $(PWD)/build
+SUBDIRS = $(foreach i,jellyfish2 jellyfish1 SuperReads quorum CA_kmer CA,$(DEST)/$(i))
+check_config = test -f $@/Makefile -a $@/Makefile -nt $(1)/configure.ac || (cd $@; $(PWD)/$(1)/configure --prefix=$(DEST)/inst $(2))
+make_install = $(MAKE) -C $@ -j $(NCPU) install INSTALL="$(UPD_INSTALL)"
+.PHONY: subdirs $(SUBDIRS)
 
+all: $(SUBDIRS)
+
+$(DEST)/jellyfish2: jellyfish-2.0/configure
+	mkdir -p $@
+	$(call check_config,jellyfish-2.0,--program-suffix=-2.0)
+	$(call make_install)
+
+$(DEST)/jellyfish1: jellyfish-1.1/configure
+	mkdir -p $@
+	$(call check_config,jellyfish-1.1,)
+	$(call make_install)
+
+$(DEST)/SuperReads: SuperReads/configure
+	mkdir -p $@
+	$(call check_config,SuperReads,PKG_CONFIG_PATH=$(shell make -s -C $(DEST)/jellyfish2 print-pkgconfigdir))
+	$(call make_install)
+
+$(DEST)/quorum: quorum/configure
+	mkdir -p $@
+	$(call check_config,quorum,--with-relative-jf-path --enable-relative-paths PKG_CONFIG_PATH=$(shell make -s -C $(DEST)/jellyfish1 print-pkgconfigdir))
+	$(call make_install)
+
+$(DEST)/CA_kmer:
+	test -f $@/Makefile || (ln -sf $(PWD)/wgs/kmer $@; cd $@; ./configure.sh)
+	cd $@; make; make install
+
+$(DEST)/CA: wgs/build-default/tup.config wgs/.tup/db
+	test -d $@ || (mkdir -p $(PWD)/wgs/build-default; ln -sf $(PWD)/wgs/build-default $@)
+	cd $@; tup upd
+	mkdir -p $(DEST)/inst/CA/Linux-amd64; rsync -a $@/bin $(DEST)/inst/CA/Linux-amd64
+
+wgs/build-default/tup.config:
+	mkdir -p $(dir $@)
+	(echo "CONFIG_CXXFLAGS=-Wno-error=format -Wno-error=unused-function -Wno-error=unused-variable"; \
+	 echo "CONFIG_KMER=$(PWD)/wgs/kmer/Linux-amd64") > $@
+
+%/.tup/db:
+	cd $*; tup init
+
+%/configure: %/configure.ac %/Makefile.am
+	cd $*; autoreconf -fi
+
+#####################################
+# Display version of all components #
+#####################################
 .PHONY: versions
 versions:
 	@echo $(foreach comp,$(COMPONENTS),$(comp):$($(comp)_VERSION):$($(comp)_DIR))
 
-%/configure: %/configure.ac %/Makefile.am
-	cd $*; autoreconf -fi
 
 #############################################
 # Tag all components with MaSuRCA's version #
@@ -26,7 +79,7 @@ versions:
 tag:
 	git submodule foreach git tag -f $(NAME)-$(VERSION)
 	git tag -f $(NAME)-$(VERSION)
-	git submodule foreach git push --tags
+	git submodule foreach git push --tags 
 #	git foreach git push --tags
 
 ###########################################
