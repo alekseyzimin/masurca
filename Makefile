@@ -12,16 +12,10 @@ jellyfish-2.0_DIR = jellyfish-$(jellyfish-2.0_VERSION)
 SuperReads_DIR = SuperReads-$(SuperReads_VERSION)
 quorum_DIR = quorum-$(quorum_VERSION)
 
-UPD_INSTALL = $(shell which install) -C
-
-
-.PHONY: versions
-versions:
-	@echo $(foreach comp,$(COMPONENTS),$(comp):$($(comp)_VERSION):$($(comp)_DIR))
-
 ##################################################################
 # Rules for compilling a working distribution in build (or DEST) #
 ##################################################################
+UPD_INSTALL = $(shell which install) -C
 PWD = $(shell pwd)
 DEST = $(PWD)/build
 SUBDIRS = $(foreach i,jellyfish2 jellyfish1 SuperReads quorum CA_kmer CA,$(DEST)/$(i))
@@ -29,7 +23,7 @@ check_config = test -f $@/Makefile -a $@/Makefile -nt $(1)/configure.ac || (cd $
 make_install = $(MAKE) -C $@ -j $(NCPU) install INSTALL="$(UPD_INSTALL)"
 .PHONY: subdirs $(SUBDIRS)
 
-subdirs: $(SUBDIRS)
+all: $(SUBDIRS)
 
 $(DEST)/jellyfish2: jellyfish-2.0/configure
 	mkdir -p $@
@@ -70,6 +64,14 @@ wgs/build-default/tup.config:
 
 %/configure: %/configure.ac %/Makefile.am
 	cd $*; autoreconf -fi
+
+#####################################
+# Display version of all components #
+#####################################
+.PHONY: versions
+versions:
+	@echo $(foreach comp,$(COMPONENTS),$(comp):$($(comp)_VERSION):$($(comp)_DIR))
+
 
 #############################################
 # Tag all components with MaSuRCA's version #
