@@ -42,7 +42,7 @@ $(DEST)/SuperReads: SuperReads/configure
 
 $(DEST)/quorum: quorum/configure
 	mkdir -p $@
-	$(call check_config,quorum,--with-relative-jf-path --enable-relative-paths PKG_CONFIG_PATH=$(shell make -s -C $(DEST)/jellyfish1 print-pkgconfigdir))
+	$(call check_config,quorum,--with-relative-jf-path --enable-relative-paths PKG_CONFIG_PATH=$(shell make -s -C $(DEST)/jellyfish2 print-pkgconfigdir) JELLYFISH=$(shell make -s -C $(DEST)/jellyfish2 print-bindir)/jellyfish-2.0)
 	$(call make_install)
 
 $(DEST)/CA_kmer:
@@ -66,7 +66,7 @@ wgs/build-default/tup.config:
 %/.tup/db:
 	cd $*; tup init
 
-%/configure: %/configure.ac %/Makefile.am
+%/configure: %/configure.ac
 	cd $*; autoreconf -fi
 
 #####################################
