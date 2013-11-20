@@ -51,13 +51,17 @@ $(DEST)/CA_kmer:
 
 $(DEST)/CA: wgs/build-default/tup.config wgs/.tup/db
 	test -d $@ || (mkdir -p $(PWD)/wgs/build-default; ln -sf $(PWD)/wgs/build-default $@)
-	cd $@; tup upd
+	cd $@; export LD_RUN_PATH=$(shell make -s -C $(DEST)/jellyfish2 print-libdir); tup upd
 	mkdir -p $(DEST)/inst/CA/Linux-amd64; rsync -a $@/bin $(DEST)/inst/CA/Linux-amd64
 
 wgs/build-default/tup.config:
 	mkdir -p $(dir $@)
-	(echo "CONFIG_CXXFLAGS=-Wno-error=format -Wno-error=unused-function -Wno-error=unused-variable"; \
-	 echo "CONFIG_KMER=$(PWD)/wgs/kmer/Linux-amd64") > $@
+	(export PKG_CONFIG_PATH=$(shell make -s -C $(DEST)/jellyfish2 print-pkgconfigdir); \
+	 echo "CONFIG_CXXFLAGS=-Wno-error=format -Wno-error=unused-function -Wno-error=unused-variable"; \
+	 echo "CONFIG_KMER=$(PWD)/wgs/kmer/Linux-amd64"; \
+	 echo -n "CONFIG_JELLYFISH_CFLAGS="; pkg-config --cflags jellyfish-2.0; \
+	 echo -n "CONFIG_JELLYFISH_LIBS="; pkg-config --libs jellyfish-2.0 \
+	) > $@
 
 %/.tup/db:
 	cd $*; tup init
