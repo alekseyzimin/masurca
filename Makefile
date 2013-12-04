@@ -4,10 +4,9 @@ VERSION = 2.1.0
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo)
 
 # Component versions
-COMPONENTS = jellyfish-1.1 jellyfish-2.0 SuperReads quorum
-# Defines variables jellyfish-1.1_VERSION, etc.
+COMPONENTS = jellyfish-2.0 SuperReads quorum
+# Defines variables jellyfish-2.0_VERSION, etc.
 $(foreach comp,$(COMPONENTS),$(eval $(comp)_VERSION=$(shell autom4te --language=autoconf --trace 'AC_INIT:$$2' $(comp)/configure.ac)))
-jellyfish-1.1_DIR = jellyfish-$(jellyfish-1.1_VERSION)
 jellyfish-2.0_DIR = jellyfish-$(jellyfish-2.0_VERSION)
 SuperReads_DIR = SuperReads-$(SuperReads_VERSION)
 quorum_DIR = quorum-$(quorum_VERSION)
@@ -18,7 +17,7 @@ quorum_DIR = quorum-$(quorum_VERSION)
 UPD_INSTALL = $(shell which install) -C
 PWD = $(shell pwd)
 DEST = $(PWD)/build
-SUBDIRS = $(foreach i,jellyfish2 jellyfish1 SuperReads quorum CA_kmer CA,$(DEST)/$(i))
+SUBDIRS = $(foreach i,jellyfish2 SuperReads quorum CA_kmer CA,$(DEST)/$(i))
 check_config = test -f $@/Makefile -a $@/Makefile -nt $(1)/configure.ac || (cd $@; $(PWD)/$(1)/configure --prefix=$(DEST)/inst $(2))
 make_install = $(MAKE) -C $@ -j $(NCPU) install INSTALL="$(UPD_INSTALL)"
 .PHONY: subdirs $(SUBDIRS)
@@ -28,11 +27,6 @@ all: $(SUBDIRS)
 $(DEST)/jellyfish2: jellyfish-2.0/configure
 	mkdir -p $@
 	$(call check_config,jellyfish-2.0,--program-suffix=-2.0)
-	$(call make_install)
-
-$(DEST)/jellyfish1: jellyfish-1.1/configure
-	mkdir -p $@
-	$(call check_config,jellyfish-1.1,)
 	$(call make_install)
 
 $(DEST)/SuperReads: SuperReads/configure
@@ -162,9 +156,8 @@ build-static/CA.installed: build-static/CA/src/Makefile
 	touch $@
 
 # SuperReads and Quorum rely on jellyfish being installed
-build-static/Quorum/Makefile: build-static/jellyfish-1.1.installed
-build-static/SuperReads/Makefile: build-static/jellyfish-2.0.installed build-static/jellyfish-1.1.installed
-build-static/jellyfish-1.1.installed: build-static/jellyfish-2.0.installed
+build-static/Quorum/Makefile: build-static/jellyfish-2.0.installed
+build-static/SuperReads/Makefile: build-static/jellyfish-2.0.installed
 
 $(STATICDIR).tar.gz: $(foreach comp,$(COMPONENTS),build-static/$(comp).installed) build-static/CA.installed
 	rm -rf $(STATICDIR); mkdir -p $(STATICDIR) $(STATICDIR)/Linux-amd64
