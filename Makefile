@@ -1,13 +1,13 @@
 # MaSurCA version
 NAME=MaSuRCA
 VERSION = 2.2.0
-NCPU = $(shell grep -c '^processor' /proc/cpuinfo)
+NCPU = $(shell grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl hw.ncpu 2>/dev/null || echo 1)
 
 # Component versions
-COMPONENTS = jellyfish-2.0 SuperReads quorum
+COMPONENTS = jellyfish SuperReads quorum
 # Defines variables jellyfish-2.0_VERSION, etc.
 $(foreach comp,$(COMPONENTS),$(eval $(comp)_VERSION=$(shell autom4te --language=autoconf --trace 'AC_INIT:$$2' $(comp)/configure.ac)))
-jellyfish-2.0_DIR = jellyfish-$(jellyfish-2.0_VERSION)
+jellyfish_DIR = jellyfish-$(jellyfish_VERSION)
 SuperReads_DIR = SuperReads-$(SuperReads_VERSION)
 quorum_DIR = quorum-$(quorum_VERSION)
 
@@ -17,26 +17,33 @@ quorum_DIR = quorum-$(quorum_VERSION)
 UPD_INSTALL = $(shell which install) -C
 PWD = $(shell pwd)
 DEST = $(PWD)/build
-SUBDIRS = $(foreach i,jellyfish2 SuperReads quorum CA_kmer CA,$(DEST)/$(i))
+SUBDIRS = $(foreach i,$(COMPONENTS) CA_kmer CA,$(DEST)/$(i))
 check_config = test -f $@/Makefile -a $@/Makefile -nt $(1)/configure.ac || (cd $@; $(PWD)/$(1)/configure --prefix=$(DEST)/inst $(2))
 make_install = $(MAKE) -C $@ -j $(NCPU) install INSTALL="$(UPD_INSTALL)"
+
+# Get info of where things are installed
+get_var = $(shell make -s -C $(DEST)/$(1) print-$(2))
+BINDIR = $(call get_var,jellyfish,bindir)
+LIBDIR = $(call get_var,jellyfish,libdir)
+PKGCONFIGDIR = $(call get_var,jellyfish,pkgconfigdir)
+
 .PHONY: subdirs $(SUBDIRS)
 
 all: $(SUBDIRS)
 
-$(DEST)/jellyfish2: jellyfish-2.0/configure
+$(DEST)/jellyfish: jellyfish/configure
 	mkdir -p $@
-	$(call check_config,jellyfish-2.0,--program-suffix=-2.0)
+	$(call check_config,jellyfish,--program-suffix=-2.0)
 	$(call make_install)
 
 $(DEST)/SuperReads: SuperReads/configure
 	mkdir -p $@
-	$(call check_config,SuperReads,PKG_CONFIG_PATH=$(shell make -s -C $(DEST)/jellyfish2 print-pkgconfigdir))
+	$(call check_config,SuperReads,PKG_CONFIG_PATH=$(PKGCONFIGDIR))
 	$(call make_install)
 
 $(DEST)/quorum: quorum/configure
 	mkdir -p $@
-	$(call check_config,quorum,--with-relative-jf-path --enable-relative-paths PKG_CONFIG_PATH=$(shell make -s -C $(DEST)/jellyfish2 print-pkgconfigdir) JELLYFISH=$(shell make -s -C $(DEST)/jellyfish2 print-bindir)/jellyfish-2.0)
+	$(call check_config,quorum,--enable-relative-paths JELLYFISH=$(BINDIR)/jellyfish-2.0 PKG_CONFIG_PATH=$(PKGCONFIGDIR))
 	$(call make_install)
 
 $(DEST)/CA_kmer:
@@ -45,12 +52,12 @@ $(DEST)/CA_kmer:
 
 $(DEST)/CA: wgs/build-default/tup.config wgs/.tup/db
 	test -d $@ || (mkdir -p $(PWD)/wgs/build-default; ln -sf $(PWD)/wgs/build-default $@)
-	cd $@; export LD_RUN_PATH=$(shell make -s -C $(DEST)/jellyfish2 print-libdir); tup upd
-	mkdir -p $(DEST)/inst/CA/Linux-amd64; rsync -a $@/bin $(DEST)/inst/CA/Linux-amd64
+	cd $@; export LD_RUN_PATH=$(LIBDIR); tup upd
+	mkdir -p $(DEST)/inst/CA/Linux-amd64; rsync -a --delete $@/bin $(DEST)/inst/CA/Linux-amd64
 
 wgs/build-default/tup.config:
 	mkdir -p $(dir $@)
-	(export PKG_CONFIG_PATH=$(shell make -s -C $(DEST)/jellyfish2 print-pkgconfigdir); \
+	(export PKG_CONFIG_PATH=$(PKGCONFIGDIR); \
 	 echo "CONFIG_CXXFLAGS=-Wno-error=format -Wno-error=unused-function -Wno-error=unused-variable"; \
 	 echo "CONFIG_KMER=$(PWD)/wgs/kmer/Linux-amd64"; \
 	 echo -n "CONFIG_JELLYFISH_CFLAGS="; pkg-config --cflags jellyfish-2.0; \
@@ -83,36 +90,26 @@ tag:
 ###########################################
 # Rules for making a tarball distribution #
 ###########################################
-define Makefile_template =
-build-dist/$(1)/Makefile: $(1)/configure
-	mkdir -p $$(dir $$@)
-	@conf=`readlink -f $$<`; ipath=`pwd`/build/install; echo $$$$conf; cd $$(dir $$@); $$$$conf
-endef
-$(foreach comp,$(COMPONENTS),$(eval $(call Makefile_template,$(comp))))
-
-define tarball_template =
-%/$($(1)_DIR).tar.gz: build-dist/$(1)/Makefile
-	mkdir -p $$*
-	make -C $$(dir $$<) -j $(NCPU) dist; mv $$(dir $$<)$$(notdir $$@) $$@
-endef
-$(foreach comp,$(COMPONENTS),$(eval $(call tarball_template,$(comp))))
-
-%/CA.tar.gz:
-	(cd wgs; git archive --format=tar --prefix=CA/ HEAD) | gzip > $@
-
-%/install.sh: install.sh.in
-	mkdir -p $(dir $@)
-	sed $(foreach comp,$(COMPONENTS), -e 's/@$(comp)_DIR@/$($(comp)_DIR)/') $< > $@	
-	chmod a+rx $@
-
-%/PkgConfig.pm: PkgConfig.pm
-	cp $< $@
-	chmod a+rx $@
-
 DISTDIR = $(NAME)-$(VERSION)
-$(DISTDIR).tar.gz: $(foreach comp,$(COMPONENTS),$(DISTDIR)/$($(comp)_DIR).tar.gz) $(DISTDIR)/CA.tar.gz $(DISTDIR)/install.sh $(DISTDIR)/PkgConfig.pm
-	for i in $^; do case $$i in (*.tar.gz) tar -zxf $$i -C $(DISTDIR); (*) ;; esac; done
-	tar -zcf $@ --exclude='*.tar.gz' $(DISTDIR)
+.PHONY: clean_distdir
+clean_distdir:
+	rm -rf $(DISTDIR)
+	mkdir -p $(DISTDIR)
+
+$(DISTDIR)/%:
+	$(MAKE) -C $(DEST)/$* -j $(NCPU) distdir distdir=$(shell pwd)/$@
+
+$(DISTDIR)/CA:
+	(cd wgs; git archive --format=tar --prefix=CA/ HEAD) | (cd $(dir $@); tar -x)
+
+$(DISTDIR)/install.sh: install.sh.in
+	install $< $@
+
+$(DISTDIR)/PkgConfig.pm: PkgConfig.pm
+	install $< $@
+
+$(DISTDIR).tar.gz: clean_distdir $(foreach comp,$(COMPONENTS),$(DISTDIR)/$(comp)) $(DISTDIR)/CA $(DISTDIR)/install.sh $(DISTDIR)/PkgConfig.pm
+	tar -zcf $@ $(DISTDIR)
 
 .PHONY: dist
 dist: $(DISTDIR).tar.gz
@@ -120,13 +117,17 @@ dist: $(DISTDIR).tar.gz
 ###############################
 # Rules for compiling locally #
 ###############################
-.PHONY: install
-tests/$(DISTDIR): $(DISTDIR).tar.gz
+.PHONY: install clean_test_install
+
+clean_test_install:
+	rm -rf tests/$(DISTDIR)
 	mkdir -p tests
+
+tests/$(DISTDIR): $(DISTDIR).tar.gz
 	tar zxf $< -C tests
 
-install: tests/$(DISTDIR)
-	cd $<; ./install.sh
+install: clean_test_install tests/$(DISTDIR)
+	cd tests/$(DISTDIR); ./install.sh
 
 #########################################
 # Rules to create a static distribution #
