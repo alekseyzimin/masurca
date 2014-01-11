@@ -5,11 +5,12 @@ NCPU = $(shell grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl hw.ncpu 
 
 # Component versions
 COMPONENTS = jellyfish SuperReads quorum
-# Defines variables jellyfish-2.0_VERSION, etc.
-$(foreach comp,$(COMPONENTS),$(eval $(comp)_VERSION=$(shell autom4te --language=autoconf --trace 'AC_INIT:$$2' $(comp)/configure.ac)))
-jellyfish_DIR = jellyfish-$(jellyfish_VERSION)
-SuperReads_DIR = SuperReads-$(SuperReads_VERSION)
-quorum_DIR = quorum-$(quorum_VERSION)
+
+# # Defines variables jellyfish-2.0_VERSION, etc.
+# $(foreach comp,$(COMPONENTS),$(eval $(comp)_VERSION=$(shell autom4te --language=autoconf --trace 'AC_INIT:$$2' $(comp)/configure.ac)))
+# jellyfish_DIR = jellyfish-$(jellyfish_VERSION)
+# SuperReads_DIR = SuperReads-$(SuperReads_VERSION)
+# quorum_DIR = quorum-$(quorum_VERSION)
 
 ##################################################################
 # Rules for compilling a working distribution in build (or DEST) #
@@ -73,9 +74,9 @@ wgs/build-default/tup.config:
 #####################################
 # Display version of all components #
 #####################################
-.PHONY: versions
-versions:
-	@echo $(foreach comp,$(COMPONENTS),$(comp):$($(comp)_VERSION):$($(comp)_DIR))
+# .PHONY: versions
+# versions:
+# 	@echo $(foreach comp,$(COMPONENTS),$(comp):$($(comp)_VERSION):$($(comp)_DIR))
 
 
 #############################################
@@ -128,6 +129,7 @@ tests/$(DISTDIR): $(DISTDIR).tar.gz
 
 install: clean_test_install tests/$(DISTDIR)
 	cd tests/$(DISTDIR); ./install.sh
+	@echo -e "**************************************************\n* Installation of $(DISTDIR) successful\n* Distribution available as $(DISTDIR).tar.gz\n**************************************************"
 
 #########################################
 # Rules to create a static distribution #
