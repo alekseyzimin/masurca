@@ -12,35 +12,31 @@ mkdir -p dist-bin
 PATH=$PATH:$ROOT/dist-bin
 which gmake >/dev/null 2>&1 || ln -s $(which make) $ROOT/dist-bin/gmake
 
-export JF1_DIR=@jellyfish-1.1_DIR@
-export JF2_DIR=@jellyfish-2.0_DIR@
-export SR_DIR=@SuperReads_DIR@
-export QR_DIR=@quorum_DIR@
-export NUM_THREADS=`grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu`;
+export JF_DIR=jellyfish
+export SR_DIR=SuperReads
+export QR_DIR=quorum
+export NUM_THREADS=`grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1`;
 
-(cd $JF1_DIR && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
-(cd $JF2_DIR && ./configure --prefix=$DEST --program-suffix=-2.0 && make -j $NUM_THREADS install)
+(cd $JF_DIR && ./configure --prefix=$DEST --program-suffix=-2.0 && make -j $NUM_THREADS install)
 
-export PKG_CONFIG_PATH=$(make -s -C $JF1_DIR print-pkgconfigdir):$(make -s -C $JF2_DIR print-pkgconfigdir):$PKG_CONFIG_PATH
-BINDIR=$(make -s -C $JF2_DIR print-bindir)
-LIBDIR=$(make -s -C $JF2_DIR print-libdir)
+export PKG_CONFIG_PATH=$(make -s -C $JF_DIR print-pkgconfigdir):$PKG_CONFIG_PATH
+BINDIR=$(make -s -C $JF_DIR print-bindir)
+LIBDIR=$(make -s -C $JF_DIR print-libdir)
 PATH="$BINDIR:$PATH"
 
 # Define in case pkg-config does not exists
-export JELLYFISH_1_1_CFLAGS="$(./PkgConfig.pm --cflags jellyfish-1.1)"
-export JELLYFISH_1_1_LIBS="$(./PkgConfig.pm --libs jellyfish-1.1)"
-export JELLYFISH_2_0_CFLAGS="$(./PkgConfig.pm --cflags jellyfish-2.0)"
-export JELLYFISH_2_0_LIBS="$(./PkgConfig.pm --libs jellyfish-2.0)"
+export JELLYFISH_CFLAGS="$(./PkgConfig.pm --cflags jellyfish-2.0)"
+export JELLYFISH_LIBS="$(./PkgConfig.pm --libs jellyfish-2.0)"
 
 (cd CA/kmer && ./configure.sh && make && make install)
 (cd CA/src && make LD_RUN_PATH="$LIBDIR")
 (cd $SR_DIR && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
-(cd $QR_DIR && ./configure --prefix=$DEST --enable-relative-paths --with-relative-jf-path && make -j $NUM_THREADS install)
+(cd $QR_DIR && ./configure --prefix=$DEST --enable-relative-paths && make -j $NUM_THREADS install)
 
-############################################
-# Make executable relocatable if necessary #
-############################################
-
+if [ "$ROOT" != "$DEST" ]; then
+    mkdir -p $DEST/CA/Linux-amd64/bin
+    cp -R CA/Linux-amd64/bin/* $DEST/CA/Linux-amd64/bin
+fi
 
 echo "creating sr_config_example.txt with correct PATHS"
 $BINDIR/masurca -g sr_config_example.txt
