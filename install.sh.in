@@ -10,7 +10,8 @@ ROOT=`pwd`
 ###################
 mkdir -p dist-bin
 PATH=$PATH:$ROOT/dist-bin
-which gmake >/dev/null 2>&1 || ln -s $(which make) $ROOT/dist-bin/gmake
+ln -s $(which make) $ROOT/dist/bin/gmake
+ln -s $ROOT/PkgConfig.pm $ROOT/dist-bin/pkg-config
 
 export JF_DIR=jellyfish
 export SR_DIR=SuperReads
