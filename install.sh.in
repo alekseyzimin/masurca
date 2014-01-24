@@ -10,7 +10,7 @@ ROOT=`pwd`
 ###################
 mkdir -p dist-bin
 PATH=$PATH:$ROOT/dist-bin
-ln -s $(which make) $ROOT/dist/bin/gmake
+ln -s $(which make) $ROOT/dist-bin/gmake
 ln -s $ROOT/PkgConfig.pm $ROOT/dist-bin/pkg-config
 
 export JF_DIR=jellyfish
