@@ -25,10 +25,6 @@ BINDIR=$(make -s -C $JF_DIR print-bindir)
 LIBDIR=$(make -s -C $JF_DIR print-libdir)
 PATH="$BINDIR:$PATH"
 
-# Define in case pkg-config does not exists
-export JELLYFISH_CFLAGS="$(./PkgConfig.pm --cflags jellyfish-2.0)"
-export JELLYFISH_LIBS="$(./PkgConfig.pm --libs jellyfish-2.0)"
-
 (cd CA/kmer && ./configure.sh && make && make install)
 (cd CA/src && make LD_RUN_PATH="$LIBDIR")
 (cd $SR_DIR && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
@@ -38,6 +34,13 @@ if [ "$ROOT" != "$DEST" ]; then
     mkdir -p $DEST/CA/Linux-amd64/bin
     cp -R CA/Linux-amd64/bin/* $DEST/CA/Linux-amd64/bin
 fi
+
+abs2rel () { perl -MFile::Spec -e 'print(File::Spec->abs2rel($ARGV[1], $ARGV[0]), "\n")' "$@"; }
+
+if [ -n "$MKREL" ]; then
+    chrpath -r "\$ORIGIN"/$(abs2rel "$BINDIR" "$LIBDIR") "$BINDIR"/*
+    chrpath -r "\$ORIGIN"/$(abs2rel "$DEST"/CA/Linux-amd64/bin "$LIBDIR") "$DEST"/CA/Linux-amd64/bin/*
+end
 
 echo "creating sr_config_example.txt with correct PATHS"
 $BINDIR/masurca -g sr_config_example.txt
