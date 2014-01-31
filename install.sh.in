@@ -38,8 +38,8 @@ fi
 abs2rel () { perl -MFile::Spec -e 'print(File::Spec->abs2rel($ARGV[1], $ARGV[0]), "\n")' "$@"; }
 
 if [ -n "$MKREL" ]; then
-    chrpath -r "\$ORIGIN"/$(abs2rel "$BINDIR" "$LIBDIR") "$BINDIR"/*
-    chrpath -r "\$ORIGIN"/$(abs2rel "$DEST"/CA/Linux-amd64/bin "$LIBDIR") "$DEST"/CA/Linux-amd64/bin/*
+    chrpath -r "\$ORIGIN"/$(abs2rel "$BINDIR" "$LIBDIR") "$BINDIR"/* 2>/dev/null || true
+    chrpath -r "\$ORIGIN"/$(abs2rel "$DEST"/CA/Linux-amd64/bin "$LIBDIR") "$DEST"/CA/Linux-amd64/bin/* 2>/dev/null || true
 fi
 
 echo "creating sr_config_example.txt with correct PATHS"
