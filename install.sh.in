@@ -10,7 +10,8 @@ ROOT=`pwd`
 ###################
 mkdir -p dist-bin
 PATH=$PATH:$ROOT/dist-bin
-which gmake >/dev/null 2>&1 || ln -s $(which make) $ROOT/dist-bin/gmake
+ln -s $(which make) $ROOT/dist-bin/gmake
+ln -s $ROOT/PkgConfig.pm $ROOT/dist-bin/pkg-config
 
 export JF_DIR=jellyfish
 export SR_DIR=SuperReads
@@ -24,10 +25,6 @@ BINDIR=$(make -s -C $JF_DIR print-bindir)
 LIBDIR=$(make -s -C $JF_DIR print-libdir)
 PATH="$BINDIR:$PATH"
 
-# Define in case pkg-config does not exists
-export JELLYFISH_CFLAGS="$(./PkgConfig.pm --cflags jellyfish-2.0)"
-export JELLYFISH_LIBS="$(./PkgConfig.pm --libs jellyfish-2.0)"
-
 (cd CA/kmer && ./configure.sh && make && make install)
 (cd CA/src && make LD_RUN_PATH="$LIBDIR")
 (cd $SR_DIR && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
@@ -36,6 +33,13 @@ export JELLYFISH_LIBS="$(./PkgConfig.pm --libs jellyfish-2.0)"
 if [ "$ROOT" != "$DEST" ]; then
     mkdir -p $DEST/CA/Linux-amd64/bin
     cp -R CA/Linux-amd64/bin/* $DEST/CA/Linux-amd64/bin
+fi
+
+abs2rel () { perl -MFile::Spec -e 'print(File::Spec->abs2rel($ARGV[1], $ARGV[0]), "\n")' "$@"; }
+
+if [ -n "$MKREL" ]; then
+    chrpath -k -r "\$ORIGIN"/$(abs2rel "$BINDIR" "$LIBDIR") "$BINDIR"/* 2>/dev/null || true
+    chrpath -k -r "\$ORIGIN"/$(abs2rel "$DEST"/CA/Linux-amd64/bin "$LIBDIR") "$DEST"/CA/Linux-amd64/bin/* 2>/dev/null || true
 fi
 
 echo "creating sr_config_example.txt with correct PATHS"

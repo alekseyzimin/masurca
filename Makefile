@@ -59,7 +59,8 @@ $(DEST)/CA: wgs/build-default/tup.config wgs/.tup/db
 wgs/build-default/tup.config:
 	mkdir -p $(dir $@)
 	(export PKG_CONFIG_PATH=$(PKGCONFIGDIR); \
-	 echo "CONFIG_CXXFLAGS=-Wno-error=format -Wno-error=unused-function -Wno-error=unused-variable"; \
+	 echo "CONFIG_CXXFLAGS=-Wno-error=format -Wno-error=unused-function -Wno-error=unused-variable -fopenmp"; \
+         echo "CONFIG_LDFLAGS=-fopenmp"; \
 	 echo "CONFIG_KMER=$(PWD)/wgs/kmer/Linux-amd64"; \
 	 echo -n "CONFIG_JELLYFISH_CFLAGS="; pkg-config --cflags jellyfish-2.0; \
 	 echo -n "CONFIG_JELLYFISH_LIBS="; pkg-config --libs jellyfish-2.0 \
