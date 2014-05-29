@@ -32,6 +32,9 @@ PKGCONFIGDIR = $(call get_var,jellyfish,pkgconfigdir)
 
 all: $(SUBDIRS)
 
+pull:
+	for i in $(COMPONENTS) wgs; do (cd $$i; git checkout develop; git pull); done
+
 $(DEST)/jellyfish: jellyfish/configure
 	mkdir -p $@
 	$(call check_config,jellyfish,--program-suffix=-2.0)
@@ -113,8 +116,14 @@ $(DISTDIR)/PkgConfig.pm: PkgConfig.pm
 $(DISTDIR).tar.gz: clean_distdir $(foreach comp,$(COMPONENTS),$(DISTDIR)/$(comp)) $(DISTDIR)/CA $(DISTDIR)/install.sh $(DISTDIR)/PkgConfig.pm
 	tar -zcf $@ $(DISTDIR)
 
+$(DISTDIR).tar.bz: clean_distdir $(foreach comp,$(COMPONENTS),$(DISTDIR)/$(comp)) $(DISTDIR)/CA $(DISTDIR)/install.sh $(DISTDIR)/PkgConfig.pm
+	tar -jcf $@ $(DISTDIR)
+
+$(DISTDIR).tar.xz: clean_distdir $(foreach comp,$(COMPONENTS),$(DISTDIR)/$(comp)) $(DISTDIR)/CA $(DISTDIR)/install.sh $(DISTDIR)/PkgConfig.pm
+	tar -Jcf $@ $(DISTDIR)
+
 .PHONY: dist
-dist: $(DISTDIR).tar.gz
+dist: $(DISTDIR).tar.gz $(DISTDIR).tar.xz
 
 ###############################
 # Rules for compiling locally #
