@@ -709,6 +709,7 @@ GetOptions(
     'modversion'    => \my $PrintVersion,
     'version',      => \my $PrintAPIversion,
     'real-version' => \my $PrintRealVersion,
+    'atleast-pkgconfig-version=s' => \my $AtLeastVersion,
     
     'debug'         => \my $Debug,
     'with-path=s',    => \my @ExtraPaths,
@@ -744,6 +745,16 @@ if($PrintRealVersion) {
     printf STDOUT ("pkg-config.pl - cruftless pkg-config\n" .
             "Version: %s\n", $PkgConfig::VERSION);
     exit(0);
+}
+
+if(defined($AtLeastVersion)) {
+  my ($major, $minor, $bug) = split(/\./, $AtLeastVersion);
+  exit(0) if !defined($major) || $major eq "";
+  exit(1) if $major > 0;
+  exit(0) if !defined($minor) || $minor eq "";
+  exit(1) if $major == 0 && $minor > 20;
+  exit(1) if defined($bug) && $bug ne "" && $minor == 20;
+  exit(0);
 }
 
 my @FINDLIBS = @ARGV or die "Must specify at least one library";
