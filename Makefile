@@ -18,7 +18,7 @@ COMPONENTS = jellyfish SuperReads quorum
 UPD_INSTALL = $(shell which install) -C
 PWD = $(shell pwd)
 DEST = $(PWD)/build
-SUBDIRS = $(foreach i,$(COMPONENTS) CA_kmer CA,$(DEST)/$(i))
+SUBDIRS = $(foreach i,$(COMPONENTS) CA,$(DEST)/$(i))
 check_config = test -f $@/Makefile -a $@/Makefile -nt $(1)/configure.ac || (cd $@; $(PWD)/$(1)/configure --prefix=$(DEST)/inst $(2))
 make_install = $(MAKE) -C $@ -j $(NCPU) install INSTALL="$(UPD_INSTALL)"
 
@@ -50,10 +50,6 @@ $(DEST)/quorum: quorum/configure
 	$(call check_config,quorum,--enable-relative-paths JELLYFISH=$(BINDIR)/jellyfish-2.0 PKG_CONFIG_PATH=$(PKGCONFIGDIR))
 	$(call make_install)
 
-$(DEST)/CA_kmer:
-	test -f $@/Makefile || (ln -sf $(PWD)/wgs/kmer $@; cd $@; ./configure.sh)
-	cd $@; make; make install
-
 $(DEST)/CA: wgs/build-default/tup.config wgs/.tup/db
 	test -d $@ || (mkdir -p $(PWD)/wgs/build-default; ln -sf $(PWD)/wgs/build-default $@)
 	cd $@; export LD_RUN_PATH=$(LIBDIR); tup upd
@@ -64,7 +60,6 @@ wgs/build-default/tup.config:
 	(export PKG_CONFIG_PATH=$(PKGCONFIGDIR); \
 	 echo "CONFIG_CXXFLAGS=-Wno-error=format -Wno-error=unused-function -Wno-error=unused-variable -fopenmp"; \
          echo "CONFIG_LDFLAGS=-fopenmp"; \
-	 echo "CONFIG_KMER=$(PWD)/wgs/kmer/Linux-amd64"; \
 	 echo -n "CONFIG_JELLYFISH_CFLAGS="; pkg-config --cflags jellyfish-2.0; \
 	 echo -n "CONFIG_JELLYFISH_LIBS="; pkg-config --libs jellyfish-2.0 \
 	) > $@
@@ -164,7 +159,6 @@ build-static/CA/src/Makefile: build-static/CA.tar.gz
 	tar -zxf $< -C build-static
 
 build-static/CA.installed: build-static/CA/src/Makefile
-	cd build-static/CA/kmer; ./configure.sh; make; make install
 	cd build-static/CA/src; make ALL_STATIC=1
 	touch $@
 

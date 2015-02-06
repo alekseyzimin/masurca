@@ -25,7 +25,6 @@ BINDIR=$(make -s -C $JF_DIR print-bindir)
 LIBDIR=$(make -s -C $JF_DIR print-libdir)
 PATH="$BINDIR:$PATH"
 
-(cd CA/kmer && ./configure.sh && make && make install)
 (cd CA/src && make LD_RUN_PATH="$LIBDIR")
 (cd $SR_DIR && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
 (cd $QR_DIR && ./configure --prefix=$DEST --enable-relative-paths && make -j $NUM_THREADS install)
