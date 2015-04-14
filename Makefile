@@ -4,7 +4,7 @@ VERSION = 2.3.2
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl hw.ncpu 2>/dev/null || echo 1)
 
 # Component versions
-COMPONENTS = jellyfish SuperReads quorum
+COMPONENTS = jellyfish SuperReads quorum PacBio
 
 # # Defines variables jellyfish-2.0_VERSION, etc.
 # $(foreach comp,$(COMPONENTS),$(eval $(comp)_VERSION=$(shell autom4te --language=autoconf --trace 'AC_INIT:$$2' $(comp)/configure.ac)))
@@ -48,6 +48,11 @@ $(DEST)/SuperReads: SuperReads/configure
 $(DEST)/quorum: quorum/configure
 	mkdir -p $@
 	$(call check_config,quorum,--enable-relative-paths JELLYFISH=$(BINDIR)/jellyfish-2.0 PKG_CONFIG_PATH=$(PKGCONFIGDIR))
+	$(call make_install)
+
+$(DEST)/PacBio: PacBio/configure
+	mkdir -p $@
+	$(call check_config,PacBio,PKG_CONFIG_PATH=$(PKGCONFIGDIR))
 	$(call make_install)
 
 $(DEST)/CA: wgs/build-default/tup.config wgs/.tup/db

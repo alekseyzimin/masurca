@@ -10,3 +10,6 @@
 [submodule "jellyfish"]
 	path = jellyfish
 	url = /software/distr/jellyfish
+[submodule "PacBio"]
+	path = PacBio
+	url = /software/distr/PacBio
