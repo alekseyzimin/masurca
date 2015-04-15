@@ -62,7 +62,7 @@ $(DEST)/CA: wgs/build-default/tup.config wgs/.tup/db
 	mkdir -p $(DEST)/inst/CA/Linux-amd64; rsync -a --delete $@/bin $(DEST)/inst/CA/Linux-amd64
 
 $(DEST)/CA8:
-	cd wgs-8/kmer; make install
+	cd wgs-8/kmer; ./configure.sh; make install
 	cd wgs-8/src; make
 	mkdir -p $(DEST)/inst/CA8/Linux-amd64; rsync -a --delete wgs-8/Linux-amd64/bin $(DEST)/inst/CA8/Linux-amd64
 
@@ -112,6 +112,9 @@ $(DISTDIR)/%:
 
 $(DISTDIR)/CA:
 	(cd wgs; git archive --format=tar --prefix=CA/ HEAD) | (cd $(dir $@); tar -x)
+
+$(DISTDIR)/CA8:
+	(cd wgs-8; git archive --format=tar --prefix=CA8/ HEAD) | (cd $(dir $@); tar -x)
 
 $(DISTDIR)/install.sh: install.sh.in
 	install $< $@
