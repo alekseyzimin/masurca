@@ -6,24 +6,19 @@ NCPU = $(shell grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl hw.ncpu 
 # Component versions
 COMPONENTS = jellyfish SuperReads quorum PacBio CA CA8
 
-# # Defines variables jellyfish-2.0_VERSION, etc.
-# $(foreach comp,$(COMPONENTS),$(eval $(comp)_VERSION=$(shell autom4te --language=autoconf --trace 'AC_INIT:$$2' $(comp)/configure.ac)))
-# jellyfish_DIR = jellyfish-$(jellyfish_VERSION)
-# SuperReads_DIR = SuperReads-$(SuperReads_VERSION)
-# quorum_DIR = quorum-$(quorum_VERSION)
-
 ##################################################################
 # Rules for compilling a working distribution in build (or DEST) #
 ##################################################################
 UPD_INSTALL = $(shell which install) -C
 PWD = $(shell pwd)
-DEST = $(PWD)/build
-SUBDIRS = $(foreach i,$(COMPONENTS) CA CA8,$(DEST)/$(i))
-check_config = test -f $@/Makefile -a $@/Makefile -nt $(1)/configure.ac || (cd $@; $(PWD)/$(1)/configure --prefix=$(DEST)/inst $(2))
+PREF ?= $(PWD)
+BUILDDIR ?= $(PREF)/build
+SUBDIRS = $(foreach i,$(COMPONENTS),$(BUILDDIR)/$(i))
+check_config = test -f $@/Makefile -a $@/Makefile -nt $(1)/configure.ac || (cd $@; $(PWD)/$(1)/configure --prefix=$(BUILDDIR)/inst $(2))
 make_install = $(MAKE) -C $@ -j $(NCPU) install INSTALL="$(UPD_INSTALL)"
 
 # Get info of where things are installed
-get_var = $(shell make -s -C $(DEST)/$(1) print-$(2))
+get_var = $(shell make -s -C $(BUILDDIR)/$(1) print-$(2))
 BINDIR = $(call get_var,jellyfish,bindir)
 LIBDIR = $(call get_var,jellyfish,libdir)
 PKGCONFIGDIR = $(call get_var,jellyfish,pkgconfigdir)
@@ -32,39 +27,40 @@ PKGCONFIGDIR = $(call get_var,jellyfish,pkgconfigdir)
 
 all: $(SUBDIRS)
 
-pull:
-	for i in $(COMPONENTS); do (cd $$i; git checkout develop; git pull); done
+# Not all submodule use develop
+# pull:
+# 	for i in $(COMPONENTS); do (cd $$i; git checkout develop; git pull); done
 
-$(DEST)/jellyfish: jellyfish/configure
+$(BUILDDIR)/jellyfish: jellyfish/configure
 	mkdir -p $@
 	$(call check_config,jellyfish,--program-suffix=-2.0)
 	$(call make_install)
 
-$(DEST)/SuperReads: SuperReads/configure
+$(BUILDDIR)/SuperReads: SuperReads/configure
 	mkdir -p $@
 	$(call check_config,SuperReads,PKG_CONFIG_PATH=$(PKGCONFIGDIR))
 	$(call make_install)
 
-$(DEST)/quorum: quorum/configure
+$(BUILDDIR)/quorum: quorum/configure
 	mkdir -p $@
 	$(call check_config,quorum,--enable-relative-paths JELLYFISH=$(BINDIR)/jellyfish-2.0 PKG_CONFIG_PATH=$(PKGCONFIGDIR))
 	$(call make_install)
 
-$(DEST)/PacBio: PacBio/configure
+$(BUILDDIR)/PacBio: PacBio/configure
 	mkdir -p $@
 	$(call check_config,PacBio,PKG_CONFIG_PATH=$(PKGCONFIGDIR))
 	$(call make_install)
 
-$(DEST)/CA: CA/build-default/tup.config CA/.tup/db
+$(BUILDDIR)/CA: CA/build-default/tup.config CA/.tup/db
 	test -d $@ || (mkdir -p $(PWD)/CA/build-default; ln -sf $(PWD)/CA/build-default $@)
 	cd $@; export LD_RUN_PATH=$(LIBDIR); tup upd
-	mkdir -p $(DEST)/inst/CA/Linux-amd64; rsync -a --delete $@/bin $(DEST)/inst/CA/Linux-amd64
+	mkdir -p $(BUILDDIR)/inst/CA/Linux-amd64; rsync -a --delete $@/bin $(BUILDDIR)/inst/CA/Linux-amd64
 
-$(DEST)/CA8:
+$(BUILDDIR)/CA8:
 	cd CA8/kmer && make install
 	cd CA8/samtools && make
 	cd CA8/src && make
-	mkdir -p $(DEST)/inst/CA8/Linux-amd64; rsync -a --delete CA8/Linux-amd64/bin $(DEST)/inst/CA8/Linux-amd64
+	mkdir -p $(BUILDDIR)/inst/CA8/Linux-amd64; rsync -a --delete CA8/Linux-amd64/bin $(BUILDDIR)/inst/CA8/Linux-amd64
 
 CA/build-default/tup.config:
 	mkdir -p $(dir $@)
@@ -81,14 +77,6 @@ CA/build-default/tup.config:
 %/configure: %/configure.ac
 	cd $*; autoreconf -fi
 
-#####################################
-# Display version of all components #
-#####################################
-# .PHONY: versions
-# versions:
-# 	@echo $(foreach comp,$(COMPONENTS),$(comp):$($(comp)_VERSION):$($(comp)_DIR))
-
-
 #############################################
 # Tag all components with MaSuRCA's version #
 #############################################
@@ -96,96 +84,62 @@ tag:
 	git submodule foreach git tag -f $(NAME)-$(VERSION)
 	git tag -f $(NAME)-$(VERSION)
 	git submodule foreach git push --tags 
-#	git foreach git push --tags
+	git push --tags
 
 ###########################################
 # Rules for making a tarball distribution #
 ###########################################
-DISTDIR = $(NAME)-$(VERSION)
+DISTNAME = $(NAME)-$(VERSION)
+DISTDIR ?= $(PREF)/distdir
+DISTDIST = $(DISTDIR)/$(DISTNAME)
+
 .PHONY: clean_distdir
 clean_distdir:
-	rm -rf $(DISTDIR)
-	mkdir -p $(DISTDIR)
+	rm -rf $(DISTDIST)
+	mkdir -p $(DISTDIST)
 
-$(DISTDIR)/%:
-	$(MAKE) -C $(DEST)/$* -j $(NCPU) distdir distdir=$(shell pwd)/$@
+$(DISTDIST)/%:
+	$(MAKE) -C $(BUILDDIR)/$* -j $(NCPU) distdir distdir="$@"
 
-$(DISTDIR)/CA:
-	(cd $(notdir $@); git archive --format=tar --prefix=CA/ HEAD) | (cd $(dir $@); tar -x)
+$(DISTDIST)/CA:
+	(cd $(notdir $@); git archive --format=tar --prefix=$(notdir $@)/ HEAD) | (cd $(dir $@); tar -x)
 
-$(DISTDIR)/CA8:
-	(cd $(notdir $@); git archive --format=tar --prefix=CA8/ HEAD) | (cd $(dir $@); tar -x)
+$(DISTDIST)/CA8:
+	(cd $(notdir $@); git archive --format=tar --prefix=$(notdir $@)/ HEAD) | (cd $(dir $@); tar -x)
 
-$(DISTDIR)/install.sh: install.sh.in
+$(DISTDIST)/install.sh: install.sh.in
 	install $< $@
 
-$(DISTDIR)/PkgConfig.pm: PkgConfig.pm
+$(DISTDIST)/PkgConfig.pm: PkgConfig.pm
 	install $< $@
 
-DIST_COMPONENTS = $(foreach comp,$(COMPONENTS),$(DISTDIR)/$(comp))
+DIST_COMPONENTS = $(foreach comp,$(COMPONENTS),$(DISTDIST)/$(comp))
 
-$(DISTDIR).tar.gz: clean_distdir $(DIST_COMPONENTS) $(DISTDIR)/install.sh $(DISTDIR)/PkgConfig.pm
-	tar -zcf $@ $(DISTDIR)
+$(DISTNAME).tar.gz: clean_distdir $(DIST_COMPONENTS) $(DISTDIST)/install.sh $(DISTDIST)/PkgConfig.pm
+	tar -zcPf $@ --xform 's|^$(DISTDIR)||' $(DISTDIST)
 
-$(DISTDIR).tar.bz: clean_distdir $(DIST_COMPONENTS) $(DISTDIR)/install.sh $(DISTDIR)/PkgConfig.pm
-	tar -jcf $@ $(DISTDIR)
+$(DISTNAME).tar.bz: clean_distdir $(DIST_COMPONENTS) $(DISTDIST)/install.sh $(DISTDIST)/PkgConfig.pm
+	tar -jcPf $@ --xform 's|^$(DISTDIR)||' $(DISTDIST)
 
-$(DISTDIR).tar.xz: clean_distdir $(DIST_COMPONENTS) $(DISTDIR)/install.sh $(DISTDIR)/PkgConfig.pm
-	tar -Jcf $@ $(DISTDIR)
+$(DISTNAME).tar.xz: clean_distdir $(DIST_COMPONENTS) $(DISTDIST)/install.sh $(DISTDIST)/PkgConfig.pm
+	tar -JcPf $@ --xform 's|^$(DISTDIR)||' $(DISTDIST)
 
 .PHONY: dist
-dist: $(DISTDIR).tar.gz $(DISTDIR).tar.xz
+dist: $(DISTNAME).tar.gz $(DISTNAME).tar.xz
 
 ###############################
 # Rules for compiling locally #
 ###############################
 .PHONY: install clean_test_install
+TESTDIR ?= $(PREF)/tests
 
 clean_test_install:
-	rm -rf tests/$(DISTDIR)
-	mkdir -p tests
+	rm -rf $(TESTDIR)/$(DISTNAME)
+	mkdir -p $(TESTDIR)
 
-tests/$(DISTDIR): $(DISTDIR).tar.gz
-	tar zxf $< -C tests
+$(TESTDIR): $(DISTNAME).tar.gz
+	tar -zxf $< -C $(TESTDIR)
 
-install: clean_test_install tests/$(DISTDIR)
-	cd tests/$(DISTDIR); ./install.sh
-	@echo -e "**************************************************\n* Installation of $(DISTDIR) successful\n* Distribution available as $(DISTDIR).tar.gz\n**************************************************"
-
-#########################################
-# Rules to create a static distribution #
-#########################################
-.PHONY: static
-STATICDIR=$(NAME)-$(VERSION)-static-$(shell uname -p)
-define Makefile_static_template =
-build-static/$(1)/Makefile: $(1)/configure
-	mkdir -p $$(dir $$@)
-	@conf=`readlink -f $$<`; ipath=`pwd`/build-static/install; echo $$$$conf; cd $$(dir $$@); $$$$conf --prefix=$$$$ipath --enable-all-static --enable-relative-paths --with-relative-jf-path PKG_CONFIG_PATH=$$$$ipath/lib/pkgconfig
-endef
-$(foreach comp,$(COMPONENTS),$(eval $(call Makefile_static_template,$(comp))))
-
-define build_static_template =
-build-static/$(1).installed: build-static/$(1)/Makefile
-	cd $$(dir $$<); make -j $(NCPU) install
-	touch $$@
-endef
-$(foreach comp,$(COMPONENTS),$(eval $(call build_static_template,$(comp))))
-
-build-static/CA/src/Makefile: build-static/CA.tar.gz
-	tar -zxf $< -C build-static
-
-build-static/CA.installed: build-static/CA/src/Makefile
-	cd build-static/CA/src; make ALL_STATIC=1
-	touch $@
-
-# SuperReads and Quorum rely on jellyfish being installed
-build-static/Quorum/Makefile: build-static/jellyfish-2.0.installed
-build-static/SuperReads/Makefile: build-static/jellyfish-2.0.installed
-
-$(STATICDIR).tar.gz: $(foreach comp,$(COMPONENTS),build-static/$(comp).installed) build-static/CA.installed
-	rm -rf $(STATICDIR); mkdir -p $(STATICDIR) $(STATICDIR)/Linux-amd64
-	cp -R build-static/install/bin $(STATICDIR)
-	cp -R build-static/CA/Linux-amd64/bin $(STATICDIR)/Linux-amd64
-	tar zcf $@ $(STATICDIR)
-
-static: $(STATICDIR).tar.gz
+install: clean_test_install $(TESTDIR)
+	cd $(TESTDIR)/$(DISTNAME); ./install.sh
+#	@echo -e "**************************************************\n* Installation of $(DISTNAME) successful\n* Distribution available as $(DISTNAME).tar.gz\n**************************************************"
