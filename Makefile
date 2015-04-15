@@ -5,6 +5,7 @@ NCPU = $(shell grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl hw.ncpu 
 
 # Component versions
 COMPONENTS = jellyfish SuperReads quorum PacBio
+MODULES = $(COMPONENTS) wgs wgs-8
 
 # # Defines variables jellyfish-2.0_VERSION, etc.
 # $(foreach comp,$(COMPONENTS),$(eval $(comp)_VERSION=$(shell autom4te --language=autoconf --trace 'AC_INIT:$$2' $(comp)/configure.ac)))
@@ -18,7 +19,7 @@ COMPONENTS = jellyfish SuperReads quorum PacBio
 UPD_INSTALL = $(shell which install) -C
 PWD = $(shell pwd)
 DEST = $(PWD)/build
-SUBDIRS = $(foreach i,$(COMPONENTS) CA,$(DEST)/$(i))
+SUBDIRS = $(foreach i,$(COMPONENTS) CA CA8,$(DEST)/$(i))
 check_config = test -f $@/Makefile -a $@/Makefile -nt $(1)/configure.ac || (cd $@; $(PWD)/$(1)/configure --prefix=$(DEST)/inst $(2))
 make_install = $(MAKE) -C $@ -j $(NCPU) install INSTALL="$(UPD_INSTALL)"
 
@@ -33,7 +34,7 @@ PKGCONFIGDIR = $(call get_var,jellyfish,pkgconfigdir)
 all: $(SUBDIRS)
 
 pull:
-	for i in $(COMPONENTS) wgs; do (cd $$i; git checkout develop; git pull); done
+	for i in $(MODULES); do (cd $$i; git checkout develop; git pull); done
 
 $(DEST)/jellyfish: jellyfish/configure
 	mkdir -p $@
@@ -59,6 +60,11 @@ $(DEST)/CA: wgs/build-default/tup.config wgs/.tup/db
 	test -d $@ || (mkdir -p $(PWD)/wgs/build-default; ln -sf $(PWD)/wgs/build-default $@)
 	cd $@; export LD_RUN_PATH=$(LIBDIR); tup upd
 	mkdir -p $(DEST)/inst/CA/Linux-amd64; rsync -a --delete $@/bin $(DEST)/inst/CA/Linux-amd64
+
+$(DEST)/CA8:
+	cd wgs-8/kmer; make install
+	cd wgs-8/src; make
+	mkdir -p $(DEST)/inst/CA8/Linux-amd64; rsync -a --delete wgs-8/Linux-amd64/bin $(DEST)/inst/CA8/Linux-amd64
 
 wgs/build-default/tup.config:
 	mkdir -p $(dir $@)

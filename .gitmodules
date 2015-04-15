@@ -13,3 +13,6 @@
 [submodule "PacBio"]
 	path = PacBio
 	url = /software/distr/PacBio
+[submodule "wgs-8"]
+	path = wgs-8
+	url = /software/distr/wgs
