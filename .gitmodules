@@ -5,7 +5,7 @@
 	path = SuperReads
 	url = /software/distr/SuperReads
 [submodule "wgs"]
-	path = wgs
+	path = CA
 	url = /software/distr/wgs
 [submodule "jellyfish"]
 	path = jellyfish
@@ -14,5 +14,5 @@
 	path = PacBio
 	url = /software/distr/PacBio
 [submodule "wgs-8"]
-	path = wgs-8
-	url = /software/distr/wgs
+	path = CA8
+	url = /software/distr/wgs-8.git

@@ -4,8 +4,7 @@ VERSION = 3.0.0
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl hw.ncpu 2>/dev/null || echo 1)
 
 # Component versions
-COMPONENTS = jellyfish SuperReads quorum PacBio
-MODULES = $(COMPONENTS) wgs wgs-8
+COMPONENTS = jellyfish SuperReads quorum PacBio CA CA8
 
 # # Defines variables jellyfish-2.0_VERSION, etc.
 # $(foreach comp,$(COMPONENTS),$(eval $(comp)_VERSION=$(shell autom4te --language=autoconf --trace 'AC_INIT:$$2' $(comp)/configure.ac)))
@@ -34,7 +33,7 @@ PKGCONFIGDIR = $(call get_var,jellyfish,pkgconfigdir)
 all: $(SUBDIRS)
 
 pull:
-	for i in $(MODULES); do (cd $$i; git checkout develop; git pull); done
+	for i in $(COMPONENTS); do (cd $$i; git checkout develop; git pull); done
 
 $(DEST)/jellyfish: jellyfish/configure
 	mkdir -p $@
@@ -56,17 +55,18 @@ $(DEST)/PacBio: PacBio/configure
 	$(call check_config,PacBio,PKG_CONFIG_PATH=$(PKGCONFIGDIR))
 	$(call make_install)
 
-$(DEST)/CA: wgs/build-default/tup.config wgs/.tup/db
-	test -d $@ || (mkdir -p $(PWD)/wgs/build-default; ln -sf $(PWD)/wgs/build-default $@)
+$(DEST)/CA: CA/build-default/tup.config CA/.tup/db
+	test -d $@ || (mkdir -p $(PWD)/CA/build-default; ln -sf $(PWD)/CA/build-default $@)
 	cd $@; export LD_RUN_PATH=$(LIBDIR); tup upd
 	mkdir -p $(DEST)/inst/CA/Linux-amd64; rsync -a --delete $@/bin $(DEST)/inst/CA/Linux-amd64
 
 $(DEST)/CA8:
-	cd wgs-8/kmer; ./configure.sh; make install
-	cd wgs-8/src; make
-	mkdir -p $(DEST)/inst/CA8/Linux-amd64; rsync -a --delete wgs-8/Linux-amd64/bin $(DEST)/inst/CA8/Linux-amd64
+	cd CA8/kmer && make install
+	cd CA8/samtools && make
+	cd CA8/src && make
+	mkdir -p $(DEST)/inst/CA8/Linux-amd64; rsync -a --delete CA8/Linux-amd64/bin $(DEST)/inst/CA8/Linux-amd64
 
-wgs/build-default/tup.config:
+CA/build-default/tup.config:
 	mkdir -p $(dir $@)
 	(export PKG_CONFIG_PATH=$(PKGCONFIGDIR); \
 	 echo "CONFIG_CXXFLAGS=-Wno-error=format -Wno-error=unused-function -Wno-error=unused-variable -fopenmp"; \
@@ -111,10 +111,10 @@ $(DISTDIR)/%:
 	$(MAKE) -C $(DEST)/$* -j $(NCPU) distdir distdir=$(shell pwd)/$@
 
 $(DISTDIR)/CA:
-	(cd wgs; git archive --format=tar --prefix=CA/ HEAD) | (cd $(dir $@); tar -x)
+	(cd $(notdir $@); git archive --format=tar --prefix=CA/ HEAD) | (cd $(dir $@); tar -x)
 
 $(DISTDIR)/CA8:
-	(cd wgs-8; git archive --format=tar --prefix=CA8/ HEAD) | (cd $(dir $@); tar -x)
+	(cd $(notdir $@); git archive --format=tar --prefix=CA8/ HEAD) | (cd $(dir $@); tar -x)
 
 $(DISTDIR)/install.sh: install.sh.in
 	install $< $@
@@ -122,13 +122,15 @@ $(DISTDIR)/install.sh: install.sh.in
 $(DISTDIR)/PkgConfig.pm: PkgConfig.pm
 	install $< $@
 
-$(DISTDIR).tar.gz: clean_distdir $(foreach comp,$(COMPONENTS),$(DISTDIR)/$(comp)) $(DISTDIR)/CA $(DISTDIR)/install.sh $(DISTDIR)/PkgConfig.pm
+DIST_COMPONENTS = $(foreach comp,$(COMPONENTS),$(DISTDIR)/$(comp))
+
+$(DISTDIR).tar.gz: clean_distdir $(DIST_COMPONENTS) $(DISTDIR)/install.sh $(DISTDIR)/PkgConfig.pm
 	tar -zcf $@ $(DISTDIR)
 
-$(DISTDIR).tar.bz: clean_distdir $(foreach comp,$(COMPONENTS),$(DISTDIR)/$(comp)) $(DISTDIR)/CA $(DISTDIR)/install.sh $(DISTDIR)/PkgConfig.pm
+$(DISTDIR).tar.bz: clean_distdir $(DIST_COMPONENTS) $(DISTDIR)/install.sh $(DISTDIR)/PkgConfig.pm
 	tar -jcf $@ $(DISTDIR)
 
-$(DISTDIR).tar.xz: clean_distdir $(foreach comp,$(COMPONENTS),$(DISTDIR)/$(comp)) $(DISTDIR)/CA $(DISTDIR)/install.sh $(DISTDIR)/PkgConfig.pm
+$(DISTDIR).tar.xz: clean_distdir $(DIST_COMPONENTS) $(DISTDIR)/install.sh $(DISTDIR)/PkgConfig.pm
 	tar -Jcf $@ $(DISTDIR)
 
 .PHONY: dist

@@ -10,8 +10,8 @@ ROOT=`pwd`
 ###################
 mkdir -p dist-bin
 PATH=$PATH:$ROOT/dist-bin
-ln -s $(which make) $ROOT/dist-bin/gmake
-ln -s $ROOT/PkgConfig.pm $ROOT/dist-bin/pkg-config
+ln -sf $(which make) $ROOT/dist-bin/gmake
+ln -sf $ROOT/PkgConfig.pm $ROOT/dist-bin/pkg-config
 
 export JF_DIR=jellyfish
 export SR_DIR=SuperReads
@@ -26,15 +26,18 @@ LIBDIR=$(make -s -C $JF_DIR print-libdir)
 PATH="$BINDIR:$PATH"
 
 (cd CA/src && make LD_RUN_PATH="$LIBDIR")
-(cd CA8/kmer && ./configure.sh && make && make install)
+(cd CA8/kmer && make install)
+(cd CA8/samtools && make)
 (cd CA8/src && make)
 (cd $SR_DIR && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
 (cd $QR_DIR && ./configure --prefix=$DEST --enable-relative-paths && make -j $NUM_THREADS install)
 (cd PacBio  && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
 
 if [ "$ROOT" != "$DEST" ]; then
-    mkdir -p $DEST/CA/Linux-amd64/bin
-    cp -R CA/Linux-amd64/bin/* $DEST/CA/Linux-amd64/bin
+    for i in CA CA8; do
+        mkdir -p $DEST/${i}/Linux-amd64/bin
+        cp -R ${i}/Linux-amd64/bin/* $DEST/${i}/Linux-amd64/bin
+    done
 fi
 
 abs2rel () { perl -MFile::Spec -e 'print(File::Spec->abs2rel($ARGV[1], $ARGV[0]), "\n")' "$@"; }
