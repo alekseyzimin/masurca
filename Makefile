@@ -4,7 +4,7 @@ VERSION = 3.0.0
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl hw.ncpu 2>/dev/null || echo 1)
 
 # Component versions
-COMPONENTS = jellyfish SuperReads quorum PacBio CA CA8
+COMPONENTS = jellyfish SuperReads quorum PacBio CA CA8 SOAPdenovo2
 
 ##################################################################
 # Rules for compilling a working distribution in build (or DEST) #
@@ -57,10 +57,10 @@ $(BUILDDIR)/CA: CA/build-default/tup.config CA/.tup/db
 	mkdir -p $(BUILDDIR)/inst/CA/Linux-amd64; rsync -a --delete $@/bin $(BUILDDIR)/inst/CA/Linux-amd64
 
 $(BUILDDIR)/CA8:
-	cd CA8/kmer && make install
-	cd CA8/samtools && make
-	cd CA8/src && make
-	mkdir -p $(BUILDDIR)/inst/CA8/Linux-amd64; rsync -a --delete CA8/Linux-amd64/bin $(BUILDDIR)/inst/CA8/Linux-amd64
+	[ -n "$$SKIP_CA8" ] || ( cd CA8/kmer && make install )
+	[ -n "$$SKIP_CA8" ] || ( cd CA8/samtools && make )
+	[ -n "$$SKIP_CA8" ] || ( cd CA8/src && make )
+	[ -n "$$SKIP_CA8" ] || ( mkdir -p $(BUILDDIR)/inst/CA8/Linux-amd64; rsync -a --delete CA8/Linux-amd64/bin $(BUILDDIR)/inst/CA8/Linux-amd64 )
 
 CA/build-default/tup.config:
 	mkdir -p $(dir $@)
@@ -70,6 +70,16 @@ CA/build-default/tup.config:
 	 echo -n "CONFIG_JELLYFISH_CFLAGS="; pkg-config --cflags jellyfish-2.0; \
 	 echo -n "CONFIG_JELLYFISH_LIBS="; pkg-config --libs jellyfish-2.0 \
 	) > $@
+
+$(BUILDDIR)/SOAPdenovo2: SOAPdenovo2/build-default/tup.config SOAPdenovo2/.tup/db
+	cd SOAPdenovo2; tup upd
+	mkdir -p $(BUILDDIR)/inst/bin; install -t $(BUILDDIR)/inst/bin -C SOAPdenovo2/build-default/SOAPdenovo-63mer
+
+SOAPdenovo2/build-default/tup.config:
+	mkdir -p $(dir $@)
+	echo "CONFIG_CXXFLAGS=-O3 -fomit-frame-pointer" > $@
+
+
 
 %/.tup/db:
 	cd $*; tup init
@@ -98,14 +108,16 @@ clean_distdir:
 	rm -rf $(DISTDIST)
 	mkdir -p $(DISTDIST)
 
+# For the module that support 'make distdir', create directly the distribution directory
 $(DISTDIST)/%:
 	$(MAKE) -C $(BUILDDIR)/$* -j $(NCPU) distdir distdir="$@"
 
-$(DISTDIST)/CA:
-	(cd $(notdir $@); git archive --format=tar --prefix=$(notdir $@)/ HEAD) | (cd $(dir $@); tar -x)
-
-$(DISTDIST)/CA8:
-	(cd $(notdir $@); git archive --format=tar --prefix=$(notdir $@)/ HEAD) | (cd $(dir $@); tar -x)
+# For the module that do not support 'make distdir', get a verbatim copy from git
+define GIT_TAR =
+$(DISTDIST)/$1:
+	(cd $1; git archive --format=tar --prefix=$1/ HEAD) | (cd $(DISTDIST); tar -x)
+endef
+$(foreach d,CA CA8 SOAPdenovo2,$(eval $(call GIT_TAR,$d)))
 
 $(DISTDIST)/install.sh: install.sh.in
 	install $< $@
@@ -124,8 +136,9 @@ $(DISTNAME).tar.bz: clean_distdir $(DIST_COMPONENTS) $(DISTDIST)/install.sh $(DI
 $(DISTNAME).tar.xz: clean_distdir $(DIST_COMPONENTS) $(DISTDIST)/install.sh $(DISTDIST)/PkgConfig.pm
 	tar -JcPf $@ --xform 's|^$(DISTDIR)||' $(DISTDIST)
 
-.PHONY: dist
-dist: $(DISTNAME).tar.gz $(DISTNAME).tar.xz
+.PHONY: dist dist-all
+dist: $(DISTNAME).tar.gz
+dist-all: dist $(DISTNAME).tar.xz $(DISTNAME).tar.bz
 
 ###############################
 # Rules for compiling locally #

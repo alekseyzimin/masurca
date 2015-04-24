@@ -16,3 +16,6 @@
 [submodule "wgs-8"]
 	path = CA8
 	url = /software/distr/wgs-8.git
+[submodule "SOAPdenovo2"]
+	path = SOAPdenovo2
+	url = /software/distr/SOAPdenovo2.git
