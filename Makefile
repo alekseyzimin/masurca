@@ -1,10 +1,10 @@
 # MaSurCA version
 NAME=MaSuRCA
-VERSION = 3.0.0
+VERSION = 3.0.1
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl hw.ncpu 2>/dev/null || echo 1)
 
 # Component versions
-COMPONENTS = jellyfish SuperReads quorum PacBio CA CA8 SOAPdenovo2
+COMPONENTS = jellyfish SuperReads quorum PacBio CA CA8 SOAPdenovo2 prepare
 
 ##################################################################
 # Rules for compilling a working distribution in build (or DEST) #
@@ -71,9 +71,13 @@ CA/build-default/tup.config:
 	 echo -n "CONFIG_JELLYFISH_LIBS="; pkg-config --libs jellyfish-2.0 \
 	) > $@
 
+$(BUILDDIR)/prepare:
+	cd prepare; make
+	mkdir -p $(BUILDDIR)/inst/bin; install -t $(BUILDDIR)/inst/bin -C prepare/finalFusion
+
 $(BUILDDIR)/SOAPdenovo2: SOAPdenovo2/build-default/tup.config SOAPdenovo2/.tup/db
 	cd SOAPdenovo2; tup upd
-	mkdir -p $(BUILDDIR)/inst/bin; install -t $(BUILDDIR)/inst/bin -C SOAPdenovo2/build-default/SOAPdenovo-63mer
+	mkdir -p $(BUILDDIR)/inst/bin; install -t $(BUILDDIR)/inst/bin -C SOAPdenovo2/build-default/SOAPdenovo-63mer SOAPdenovo2/build-default/SOAPdenovo-127mer
 
 SOAPdenovo2/build-default/tup.config:
 	mkdir -p $(dir $@)
@@ -117,7 +121,7 @@ define GIT_TAR =
 $(DISTDIST)/$1:
 	(cd $1; git archive --format=tar --prefix=$1/ HEAD) | (cd $(DISTDIST); tar -x)
 endef
-$(foreach d,CA CA8 SOAPdenovo2,$(eval $(call GIT_TAR,$d)))
+$(foreach d,CA CA8 SOAPdenovo2 prepare,$(eval $(call GIT_TAR,$d)))
 
 $(DISTDIST)/install.sh: install.sh.in
 	install $< $@
