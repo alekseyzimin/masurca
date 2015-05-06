@@ -121,7 +121,15 @@ define GIT_TAR =
 $(DISTDIST)/$1:
 	(cd $1; git archive --format=tar --prefix=$1/ HEAD) | (cd $(DISTDIST); tar -x)
 endef
-$(foreach d,CA CA8 SOAPdenovo2 prepare,$(eval $(call GIT_TAR,$d)))
+
+define TAR =
+$(DISTDIST)/$1:
+	(tar c $1) | (cd $(DISTDIST); tar -x)
+endef
+
+$(foreach d,prepare,$(eval $(call TAR,$d)))
+
+$(foreach d,CA CA8 SOAPdenovo2,$(eval $(call GIT_TAR,$d)))
 
 $(DISTDIST)/install.sh: install.sh.in
 	install $< $@
