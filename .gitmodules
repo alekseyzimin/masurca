@@ -19,3 +19,6 @@
 [submodule "SOAPdenovo2"]
 	path = SOAPdenovo2
 	url = /software/distr/SOAPdenovo2.git
+[submodule "prepare"]
+	path = prepare
+	url = /software/distr/prepare.git

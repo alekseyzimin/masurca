@@ -71,9 +71,10 @@ CA/build-default/tup.config:
 	 echo -n "CONFIG_JELLYFISH_LIBS="; pkg-config --libs jellyfish-2.0 \
 	) > $@
 
-$(BUILDDIR)/prepare:
-	cd prepare; make
-	mkdir -p $(BUILDDIR)/inst/bin; install -t $(BUILDDIR)/inst/bin -C prepare/finalFusion
+$(BUILDDIR)/prepare: prepare/configure
+	mkdir -p $@
+	$(call check_config,prepare,)
+	$(call make_install)
 
 $(BUILDDIR)/SOAPdenovo2: SOAPdenovo2/build-default/tup.config SOAPdenovo2/.tup/db
 	cd SOAPdenovo2; tup upd
@@ -126,8 +127,6 @@ define TAR =
 $(DISTDIST)/$1:
 	(tar c $1) | (cd $(DISTDIST); tar -x)
 endef
-
-$(foreach d,prepare,$(eval $(call TAR,$d)))
 
 $(foreach d,CA CA8 SOAPdenovo2,$(eval $(call GIT_TAR,$d)))
 
