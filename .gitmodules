@@ -22,3 +22,6 @@
 [submodule "prepare"]
 	path = prepare
 	url = /software/distr/prepare.git
+[submodule "ufasta"]
+	path = ufasta
+	url = /software/distr/ufasta.git

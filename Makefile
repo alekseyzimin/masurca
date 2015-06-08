@@ -4,7 +4,7 @@ VERSION = 3.0.1
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl hw.ncpu 2>/dev/null || echo 1)
 
 # Component versions
-COMPONENTS = jellyfish SuperReads quorum PacBio CA CA8 SOAPdenovo2 prepare
+COMPONENTS = jellyfish SuperReads quorum PacBio CA CA8 SOAPdenovo2 prepare ufasta
 
 ##################################################################
 # Rules for compilling a working distribution in build (or DEST) #
@@ -51,6 +51,11 @@ $(BUILDDIR)/PacBio: PacBio/configure
 	$(call check_config,PacBio,PKG_CONFIG_PATH=$(PKGCONFIGDIR))
 	$(call make_install)
 
+$(BUILDDIR)/ufasta: ufasta/configure
+	mkdir -p $@
+	$(call check_config,ufasta,PKG_CONFIG_PATH=$(PKGCONFIGDIR))
+	$(call make_install)
+
 $(BUILDDIR)/CA: CA/build-default/tup.config CA/.tup/db
 	test -d $@ || (mkdir -p $(PWD)/CA/build-default; ln -sf $(PWD)/CA/build-default $@)
 	cd $@; export LD_RUN_PATH=$(LIBDIR); tup upd
@@ -82,7 +87,7 @@ $(BUILDDIR)/SOAPdenovo2: SOAPdenovo2/build-default/tup.config SOAPdenovo2/.tup/d
 
 SOAPdenovo2/build-default/tup.config:
 	mkdir -p $(dir $@)
-	echo "CONFIG_CXXFLAGS=-O3 -fomit-frame-pointer" > $@
+	echo "CONFIG_CFLAGS=-O3" > $@
 
 
 
