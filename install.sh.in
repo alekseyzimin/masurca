@@ -25,15 +25,18 @@ BINDIR=$(make -s -C $JF_DIR print-bindir)
 LIBDIR=$(make -s -C $JF_DIR print-libdir)
 PATH="$BINDIR:$PATH"
 
+(cd global-1 && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
+
 (cd CA/src && make LD_RUN_PATH="$LIBDIR")
 (cd CA8/kmer && make install)
 (cd CA8/samtools && make)
 (cd CA8/src && make)
-(cd $SR_DIR && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
-(cd $QR_DIR && ./configure --prefix=$DEST --enable-relative-paths && make -j $NUM_THREADS install)
-(cd PacBio  && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
-(cd SOAPdenovo2 && make --eval="debug=true" && install -t "$BINDIR" SOAPdenovo-63mer SOAPdenovo-127mer)
-(cd prepare && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
+
+# (cd $SR_DIR && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
+# (cd $QR_DIR && ./configure --prefix=$DEST --enable-relative-paths && make -j $NUM_THREADS install)
+# (cd PacBio  && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
+# (cd SOAPdenovo2 && make --eval="debug=true" && install -t "$BINDIR" SOAPdenovo-63mer SOAPdenovo-127mer)
+# (cd prepare && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
 
 if [ "$ROOT" != "$DEST" ]; then
     for i in CA CA8; do

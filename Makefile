@@ -4,7 +4,7 @@ VERSION = 3.0.1
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl hw.ncpu 2>/dev/null || echo 1)
 
 # Component versions
-COMPONENTS = jellyfish SuperReads quorum PacBio CA CA8 SOAPdenovo2 prepare ufasta
+COMPONENTS = jellyfish CA CA8 global # PacBio prepare ufasta quorum SuperReads SOAPdenovo2
 
 ##################################################################
 # Rules for compilling a working distribution in build (or DEST) #
@@ -12,9 +12,11 @@ COMPONENTS = jellyfish SuperReads quorum PacBio CA CA8 SOAPdenovo2 prepare ufast
 UPD_INSTALL = $(shell which install) -C
 PWD = $(shell pwd)
 PREF ?= $(PWD)
+# PREF ?= .
 BUILDDIR ?= $(PREF)/build
 SUBDIRS = $(foreach i,$(COMPONENTS),$(BUILDDIR)/$(i))
 check_config = test -f $@/Makefile -a $@/Makefile -nt $(1)/configure.ac || (cd $@; $(PWD)/$(1)/configure --prefix=$(BUILDDIR)/inst $(2))
+global_config = test -f $@/Makefile -a $@/Makefile -nt configure.ac || (cd $@; $(PWD)/configure --prefix=$(BUILDDIR)/inst $(1))
 make_install = $(MAKE) -C $@ -j $(NCPU) install INSTALL="$(UPD_INSTALL)"
 
 # Get info of where things are installed
@@ -36,24 +38,34 @@ $(BUILDDIR)/jellyfish: jellyfish/configure
 	$(call check_config,jellyfish,--program-suffix=-2.0)
 	$(call make_install)
 
-$(BUILDDIR)/SuperReads: SuperReads/configure
-	mkdir -p $@
-	$(call check_config,SuperReads,PKG_CONFIG_PATH=$(PKGCONFIGDIR))
-	$(call make_install)
+# $(BUILDDIR)/SuperReads: SuperReads/configure
+# 	mkdir -p $@
+# 	$(call check_config,SuperReads,PKG_CONFIG_PATH=$(PKGCONFIGDIR))
+# 	$(call make_install)
 
-$(BUILDDIR)/quorum: quorum/configure
-	mkdir -p $@
-	$(call check_config,quorum,--enable-relative-paths JELLYFISH=$(BINDIR)/jellyfish-2.0 PKG_CONFIG_PATH=$(PKGCONFIGDIR))
-	$(call make_install)
+# $(BUILDDIR)/quorum: quorum/configure
+# 	mkdir -p $@
+# 	$(call check_config,quorum,--enable-relative-paths JELLYFISH=$(BINDIR)/jellyfish-2.0 PKG_CONFIG_PATH=$(PKGCONFIGDIR))
+# 	$(call make_install)
 
-$(BUILDDIR)/PacBio: PacBio/configure
-	mkdir -p $@
-	$(call check_config,PacBio,PKG_CONFIG_PATH=$(PKGCONFIGDIR))
-	$(call make_install)
+# $(BUILDDIR)/PacBio: PacBio/configure
+# 	mkdir -p $@
+# 	$(call check_config,PacBio,PKG_CONFIG_PATH=$(PKGCONFIGDIR))
+# 	$(call make_install)
 
-$(BUILDDIR)/ufasta: ufasta/configure
+# $(BUILDDIR)/ufasta: ufasta/configure
+# 	mkdir -p $@
+# 	$(call check_config,ufasta,PKG_CONFIG_PATH=$(PKGCONFIGDIR))
+# 	$(call make_install)
+
+# $(BUILDDIR)/prepare: prepare/configure
+# 	mkdir -p $@
+# 	$(call check_config,prepare,)
+# 	$(call make_install)
+
+$(BUILDDIR)/global: ./configure
 	mkdir -p $@
-	$(call check_config,ufasta,PKG_CONFIG_PATH=$(PKGCONFIGDIR))
+	$(call global_config,PKG_CONFIG_PATH=$(PKGCONFIGDIR) --enable-relative-paths JELLYFISH=$(BINDIR)/jellyfish-2.0)
 	$(call make_install)
 
 $(BUILDDIR)/CA: CA/build-default/tup.config CA/.tup/db
@@ -76,14 +88,9 @@ CA/build-default/tup.config:
 	 echo -n "CONFIG_JELLYFISH_LIBS="; pkg-config --libs jellyfish-2.0 \
 	) > $@
 
-$(BUILDDIR)/prepare: prepare/configure
-	mkdir -p $@
-	$(call check_config,prepare,)
-	$(call make_install)
-
-$(BUILDDIR)/SOAPdenovo2: SOAPdenovo2/build-default/tup.config SOAPdenovo2/.tup/db
-	cd SOAPdenovo2; tup upd
-	mkdir -p $(BUILDDIR)/inst/bin; install -t $(BUILDDIR)/inst/bin -C SOAPdenovo2/build-default/SOAPdenovo-63mer SOAPdenovo2/build-default/SOAPdenovo-127mer
+# $(BUILDDIR)/SOAPdenovo2: SOAPdenovo2/build-default/tup.config SOAPdenovo2/.tup/db
+# 	cd SOAPdenovo2; tup upd
+# 	mkdir -p $(BUILDDIR)/inst/bin; install -t $(BUILDDIR)/inst/bin -C SOAPdenovo2/build-default/SOAPdenovo-63mer SOAPdenovo2/build-default/SOAPdenovo-127mer
 
 SOAPdenovo2/build-default/tup.config:
 	mkdir -p $(dir $@)
@@ -121,6 +128,10 @@ clean_distdir:
 # For the module that support 'make distdir', create directly the distribution directory
 $(DISTDIST)/%:
 	$(MAKE) -C $(BUILDDIR)/$* -j $(NCPU) distdir distdir="$@"
+
+$(DISTDIST)/global:
+	#$(MAKE) -C $(BUILDDIR)/global -j $(NCPU) distdir distdir=$(DISTDIST)
+	cd $(BUILDDIR)/global; make -j $(NCPU) dist && tar zxf global*.tar.gz -C $(DISTDIST)
 
 # For the module that do not support 'make distdir', get a verbatim copy from git
 define GIT_TAR =

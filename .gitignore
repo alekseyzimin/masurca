@@ -1,2 +1,12 @@
 autom4te.cache
 build
+*.in
+config.*
+aclocal.m4
+configure
+depcomp
+install-sh
+missing
+autom4te.cache
+ltmain.sh
+compile
