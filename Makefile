@@ -4,7 +4,7 @@ VERSION = 3.0.1
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl hw.ncpu 2>/dev/null || echo 1)
 
 # Component versions
-COMPONENTS = jellyfish CA CA8 global # PacBio prepare ufasta quorum SuperReads SOAPdenovo2
+COMPONENTS = global CA CA8 # jellyfish PacBio prepare ufasta quorum SuperReads SOAPdenovo2
 
 ##################################################################
 # Rules for compilling a working distribution in build (or DEST) #
@@ -14,16 +14,17 @@ PWD = $(shell pwd)
 PREF ?= $(PWD)
 # PREF ?= .
 BUILDDIR ?= $(PREF)/build
+BINDIR = $(BUILDDIR)/inst/bin
+LIBDIR = $(BUILDDIR)/inst/lib
+
 SUBDIRS = $(foreach i,$(COMPONENTS),$(BUILDDIR)/$(i))
 check_config = test -f $@/Makefile -a $@/Makefile -nt $(1)/configure.ac || (cd $@; $(PWD)/$(1)/configure --prefix=$(BUILDDIR)/inst $(2))
-global_config = test -f $@/Makefile -a $@/Makefile -nt configure.ac || (cd $@; $(PWD)/configure --prefix=$(BUILDDIR)/inst $(1))
+global_config = test -f $@/Makefile -a $@/Makefile -nt configure.ac || (cd $@; $(PWD)/configure --prefix=$(BUILDDIR)/inst --bindir=$(BINDIR) --libdir=$(LIBDIR) $(1))
 make_install = $(MAKE) -C $@ -j $(NCPU) install INSTALL="$(UPD_INSTALL)"
 
 # Get info of where things are installed
 get_var = $(shell make -s -C $(BUILDDIR)/$(1) print-$(2))
-BINDIR = $(call get_var,jellyfish,bindir)
-LIBDIR = $(call get_var,jellyfish,libdir)
-PKGCONFIGDIR = $(call get_var,jellyfish,pkgconfigdir)
+PKGCONFIGDIR = $(BUILDDIR)/inst/lib/pkgconfig
 
 .PHONY: subdirs $(SUBDIRS)
 
@@ -33,10 +34,10 @@ all: $(SUBDIRS)
 # pull:
 # 	for i in $(COMPONENTS); do (cd $$i; git checkout develop; git pull); done
 
-$(BUILDDIR)/jellyfish: jellyfish/configure
-	mkdir -p $@
-	$(call check_config,jellyfish,--program-suffix=-2.0)
-	$(call make_install)
+# $(BUILDDIR)/jellyfish: jellyfish/configure
+# 	mkdir -p $@
+# 	$(call check_config,jellyfish,--program-suffix=-2.0)
+# 	$(call make_install)
 
 # $(BUILDDIR)/SuperReads: SuperReads/configure
 # 	mkdir -p $@
@@ -65,7 +66,7 @@ $(BUILDDIR)/jellyfish: jellyfish/configure
 
 $(BUILDDIR)/global: ./configure
 	mkdir -p $@
-	$(call global_config,PKG_CONFIG_PATH=$(PKGCONFIGDIR) --enable-relative-paths JELLYFISH=$(BINDIR)/jellyfish-2.0)
+	$(call global_config,--enable-relative-paths JELLYFISH=$(BINDIR)/jellyfish)
 	$(call make_install)
 
 $(BUILDDIR)/CA: CA/build-default/tup.config CA/.tup/db

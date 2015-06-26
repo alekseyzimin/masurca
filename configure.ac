@@ -18,12 +18,12 @@ AC_PROG_CXX
 AC_CHECK_LIB([pthread], [pthread_create])
 AC_SEARCH_LIBS([clock_gettime], [rt], [AC_DEFINE([HAVE_CLOCK_GETTIME], [1], [Define to 1 if you have the `clock_gettime' function])])
 
-# Checks for Jellyfish module
-PKG_CHECK_MODULES([JELLYFISH2_0], [jellyfish-2.0])
-JELLYFISH_VERSION=$(pkg-config --modversion jellyfish-2.0)
-AC_SUBST([JELLYFISH_VERSION])
-AC_ARG_VAR([JELLYFISH], [Jellyfish executable absolute path (default to looking in PATH)])
-AS_IF([test "x$JELLYFISH" = "x"], [AC_PATH_PROG([JELLYFISH], [jellyfish], [false])])
+dnl # Checks for Jellyfish module
+dnl PKG_CHECK_MODULES([JELLYFISH2_0], [jellyfish-2.0])
+dnl JELLYFISH_VERSION=$(pkg-config --modversion jellyfish-2.0)
+dnl AC_SUBST([JELLYFISH_VERSION])
+dnl AC_ARG_VAR([JELLYFISH], [Jellyfish executable absolute path (default to looking in PATH)])
+dnl AS_IF([test "x$JELLYFISH" = "x"], [AC_PATH_PROG([JELLYFISH], [jellyfish], [false])])
 
 # On MacOS X, use _NSGetExecutablePath to find path to own executable
 AC_MSG_CHECKING([for _NSGetExecutablePath])
