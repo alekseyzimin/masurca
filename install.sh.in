@@ -13,30 +13,15 @@ PATH=$PATH:$ROOT/dist-bin
 ln -sf $(which make) $ROOT/dist-bin/gmake
 ln -sf $ROOT/PkgConfig.pm $ROOT/dist-bin/pkg-config
 
-export JF_DIR=jellyfish
-export SR_DIR=SuperReads
-export QR_DIR=quorum
 export NUM_THREADS=`grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1`;
-
-(cd $JF_DIR && ./configure --prefix=$DEST --program-suffix=-2.0 && make -j $NUM_THREADS install)
-
-export PKG_CONFIG_PATH=$(make -s -C $JF_DIR print-pkgconfigdir):$PKG_CONFIG_PATH
-BINDIR=$(make -s -C $JF_DIR print-bindir)
-LIBDIR=$(make -s -C $JF_DIR print-libdir)
-PATH="$BINDIR:$PATH"
-
-(cd global-1 && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
+BINDIR=$DEST/bin
+LIBDIR=$DEST/lib
+(cd global-1 && ./configure --prefix=$DEST --bindir=$BINDIR --libdir=$LIBDIR && make -j $NUM_THREADS install)
 
 (cd CA/src && make LD_RUN_PATH="$LIBDIR")
 (cd CA8/kmer && make install)
 (cd CA8/samtools && make)
 (cd CA8/src && make)
-
-# (cd $SR_DIR && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
-# (cd $QR_DIR && ./configure --prefix=$DEST --enable-relative-paths && make -j $NUM_THREADS install)
-# (cd PacBio  && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
-# (cd SOAPdenovo2 && make --eval="debug=true" && install -t "$BINDIR" SOAPdenovo-63mer SOAPdenovo-127mer)
-# (cd prepare && ./configure --prefix=$DEST && make -j $NUM_THREADS install)
 
 if [ "$ROOT" != "$DEST" ]; then
     for i in CA CA8; do

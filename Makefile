@@ -16,14 +16,13 @@ PREF ?= $(PWD)
 BUILDDIR ?= $(PREF)/build
 BINDIR = $(BUILDDIR)/inst/bin
 LIBDIR = $(BUILDDIR)/inst/lib
+INCDIR = $(BUILDDIR)/inst/include
 
 SUBDIRS = $(foreach i,$(COMPONENTS),$(BUILDDIR)/$(i))
-check_config = test -f $@/Makefile -a $@/Makefile -nt $(1)/configure.ac || (cd $@; $(PWD)/$(1)/configure --prefix=$(BUILDDIR)/inst $(2))
-global_config = test -f $@/Makefile -a $@/Makefile -nt configure.ac || (cd $@; $(PWD)/configure --prefix=$(BUILDDIR)/inst --bindir=$(BINDIR) --libdir=$(LIBDIR) $(1))
+global_config = test -f $@/Makefile -a $@/Makefile -nt configure.ac || (cd $@; $(PWD)/configure --prefix=$(BUILDDIR)/inst --libdir=$(LIBDIR) $(1))
 make_install = $(MAKE) -C $@ -j $(NCPU) install INSTALL="$(UPD_INSTALL)"
 
 # Get info of where things are installed
-get_var = $(shell make -s -C $(BUILDDIR)/$(1) print-$(2))
 PKGCONFIGDIR = $(BUILDDIR)/inst/lib/pkgconfig
 
 .PHONY: subdirs $(SUBDIRS)
@@ -34,39 +33,9 @@ all: $(SUBDIRS)
 # pull:
 # 	for i in $(COMPONENTS); do (cd $$i; git checkout develop; git pull); done
 
-# $(BUILDDIR)/jellyfish: jellyfish/configure
-# 	mkdir -p $@
-# 	$(call check_config,jellyfish,--program-suffix=-2.0)
-# 	$(call make_install)
-
-# $(BUILDDIR)/SuperReads: SuperReads/configure
-# 	mkdir -p $@
-# 	$(call check_config,SuperReads,PKG_CONFIG_PATH=$(PKGCONFIGDIR))
-# 	$(call make_install)
-
-# $(BUILDDIR)/quorum: quorum/configure
-# 	mkdir -p $@
-# 	$(call check_config,quorum,--enable-relative-paths JELLYFISH=$(BINDIR)/jellyfish-2.0 PKG_CONFIG_PATH=$(PKGCONFIGDIR))
-# 	$(call make_install)
-
-# $(BUILDDIR)/PacBio: PacBio/configure
-# 	mkdir -p $@
-# 	$(call check_config,PacBio,PKG_CONFIG_PATH=$(PKGCONFIGDIR))
-# 	$(call make_install)
-
-# $(BUILDDIR)/ufasta: ufasta/configure
-# 	mkdir -p $@
-# 	$(call check_config,ufasta,PKG_CONFIG_PATH=$(PKGCONFIGDIR))
-# 	$(call make_install)
-
-# $(BUILDDIR)/prepare: prepare/configure
-# 	mkdir -p $@
-# 	$(call check_config,prepare,)
-# 	$(call make_install)
-
 $(BUILDDIR)/global: ./configure
 	mkdir -p $@
-	$(call global_config,--enable-relative-paths JELLYFISH=$(BINDIR)/jellyfish)
+	$(call global_config,)
 	$(call make_install)
 
 $(BUILDDIR)/CA: CA/build-default/tup.config CA/.tup/db
@@ -89,10 +58,6 @@ CA/build-default/tup.config:
 	 echo -n "CONFIG_JELLYFISH_LIBS="; pkg-config --libs jellyfish-2.0 \
 	) > $@
 
-# $(BUILDDIR)/SOAPdenovo2: SOAPdenovo2/build-default/tup.config SOAPdenovo2/.tup/db
-# 	cd SOAPdenovo2; tup upd
-# 	mkdir -p $(BUILDDIR)/inst/bin; install -t $(BUILDDIR)/inst/bin -C SOAPdenovo2/build-default/SOAPdenovo-63mer SOAPdenovo2/build-default/SOAPdenovo-127mer
-
 SOAPdenovo2/build-default/tup.config:
 	mkdir -p $(dir $@)
 	echo "CONFIG_CFLAGS=-O3" > $@
@@ -102,8 +67,8 @@ SOAPdenovo2/build-default/tup.config:
 %/.tup/db:
 	cd $*; tup init
 
-%/configure: %/configure.ac
-	cd $*; autoreconf -fi
+configure: configure.ac
+	autoreconf -fi
 
 #############################################
 # Tag all components with MaSuRCA's version #
@@ -131,7 +96,6 @@ $(DISTDIST)/%:
 	$(MAKE) -C $(BUILDDIR)/$* -j $(NCPU) distdir distdir="$@"
 
 $(DISTDIST)/global:
-	#$(MAKE) -C $(BUILDDIR)/global -j $(NCPU) distdir distdir=$(DISTDIST)
 	cd $(BUILDDIR)/global; make -j $(NCPU) dist && tar zxf global*.tar.gz -C $(DISTDIST)
 
 # For the module that do not support 'make distdir', get a verbatim copy from git

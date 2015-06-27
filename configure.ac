@@ -18,12 +18,10 @@ AC_PROG_CXX
 AC_CHECK_LIB([pthread], [pthread_create])
 AC_SEARCH_LIBS([clock_gettime], [rt], [AC_DEFINE([HAVE_CLOCK_GETTIME], [1], [Define to 1 if you have the `clock_gettime' function])])
 
-dnl # Checks for Jellyfish module
-dnl PKG_CHECK_MODULES([JELLYFISH2_0], [jellyfish-2.0])
-dnl JELLYFISH_VERSION=$(pkg-config --modversion jellyfish-2.0)
-dnl AC_SUBST([JELLYFISH_VERSION])
-dnl AC_ARG_VAR([JELLYFISH], [Jellyfish executable absolute path (default to looking in PATH)])
-dnl AS_IF([test "x$JELLYFISH" = "x"], [AC_PATH_PROG([JELLYFISH], [jellyfish], [false])])
+# Flags for Jellyfish
+AC_SUBST([JELLYFISH2_0_CFLAGS], ['-I$(includedir)/jellyfish-1'])
+AC_SUBST([JELLYFISH2_0_LIBS], ['-L$(libdir) -ljellyfish-2.0'])
+AC_SUBST([JELLYFISH], ['$(bindir)/jellyfish'])
 
 # On MacOS X, use _NSGetExecutablePath to find path to own executable
 AC_MSG_CHECKING([for _NSGetExecutablePath])
@@ -62,19 +60,10 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([[int x = 0;]],
                [AC_DEFINE([HAVE_BUILTIN_PREFETCH], [1], [Defined if __builtin_prefetch is supported])],
                [AC_MSG_RESULT([no])])
 
-# From Quorum
-# --enable-relative-paths
-AC_ARG_ENABLE([relative-paths],
-              [AC_HELP_STRING([--enable-relative-paths], [store relative paths in quorum Perl script])])
-AM_CONDITIONAL([RELATIVE_PATHS], [test x$enable_relative_paths = xyes])
+# For Quorum
+AM_CONDITIONAL([RELATIVE_PATHS], [true])
+AM_CONDITIONAL([HAVE_RELATIVE_JF_PATH], [false])
 
-# --with-relative-jf-path
-AC_ARG_WITH([relative-jf-path],
-            [AC_HELP_STRING([--with-relative-jf-path], [relative path from quorum to jellyfish (use an absolute path if not given. default to "." if given with no argument)])],
-            [case "$withval" in (yes) with_relative_jf_path="jellyfish" ;; (no) with_relative_jf_path= ;; (*) with_relative_jf_path=$withval/jellyfish ;; esac],
-            [with_relative_jf_path= ])
-AC_SUBST([RELATIVE_JF_PATH], $with_relative_jf_path)
-AM_CONDITIONAL([HAVE_RELATIVE_JF_PATH], [test x$with_relative_jf_path != x])
 
 AC_CHECK_TYPE([__int128],
               [AC_DEFINE([HAVE_INT128], [1], [Define if type __int128 is supported])])
@@ -84,5 +73,5 @@ AC_CHECK_TYPE([__int128],
 AC_ARG_VAR([YAGGO], [Yaggo switch parser generator])
 AS_IF([test "x$YAGGO" = "x"], [AC_PATH_PROG([YAGGO], [yaggo], [false])])
 
-AC_CONFIG_FILES([Makefile prepare/Makefile ufasta/Makefile PacBio/Makefile quorum/Makefile SuperReads/Makefile SOAPdenovo2/Makefile])
+AC_CONFIG_FILES([Makefile jellyfish/Makefile jellyfish/jellyfish-2.0.pc prepare/Makefile ufasta/Makefile PacBio/Makefile quorum/Makefile SuperReads/Makefile SOAPdenovo2/Makefile])
 AC_OUTPUT
