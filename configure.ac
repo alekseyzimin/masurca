@@ -23,6 +23,9 @@ AC_SUBST([JELLYFISH2_0_CFLAGS], ['-I$(includedir)/jellyfish-1'])
 AC_SUBST([JELLYFISH2_0_LIBS], ['-L$(libdir) -ljellyfish-2.0'])
 AC_SUBST([JELLYFISH], ['$(bindir)/jellyfish'])
 
+# Flags for samtools
+LDFLAGS="-L\$(libdir) $LDFLAGS"
+
 # On MacOS X, use _NSGetExecutablePath to find path to own executable
 AC_MSG_CHECKING([for _NSGetExecutablePath])
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <mach-o/dyld.h>]],
@@ -73,5 +76,6 @@ AC_CHECK_TYPE([__int128],
 AC_ARG_VAR([YAGGO], [Yaggo switch parser generator])
 AS_IF([test "x$YAGGO" = "x"], [AC_PATH_PROG([YAGGO], [yaggo], [false])])
 
-AC_CONFIG_FILES([Makefile jellyfish/Makefile jellyfish/jellyfish-2.0.pc prepare/Makefile ufasta/Makefile PacBio/Makefile quorum/Makefile SuperReads/Makefile SOAPdenovo2/Makefile])
+AC_CONFIG_FILES([Makefile jellyfish/Makefile jellyfish/jellyfish-2.0.pc samtools/Makefile])
+AC_CONFIG_FILES([prepare/Makefile ufasta/Makefile PacBio/Makefile quorum/Makefile SuperReads/Makefile SOAPdenovo2/Makefile])
 AC_OUTPUT

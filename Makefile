@@ -45,7 +45,7 @@ $(BUILDDIR)/CA: CA/build-default/tup.config CA/.tup/db
 
 $(BUILDDIR)/CA8:
 	[ -n "$$SKIP_CA8" ] || ( cd CA8/kmer && make install )
-	[ -n "$$SKIP_CA8" ] || ( cd CA8/samtools && make )
+#	[ -n "$$SKIP_CA8" ] || ( cd CA8/samtools && make )
 	[ -n "$$SKIP_CA8" ] || ( cd CA8/src && make )
 	[ -n "$$SKIP_CA8" ] || ( mkdir -p $(BUILDDIR)/inst/CA8/Linux-amd64; rsync -a --delete CA8/Linux-amd64/bin $(BUILDDIR)/inst/CA8/Linux-amd64 )
 

@@ -20,7 +20,7 @@ LIBDIR=$DEST/lib
 
 (cd CA/src && make LD_RUN_PATH="$LIBDIR")
 (cd CA8/kmer && make install)
-(cd CA8/samtools && make)
+# (cd CA8/samtools && make)
 (cd CA8/src && make)
 
 if [ "$ROOT" != "$DEST" ]; then

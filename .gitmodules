@@ -25,3 +25,6 @@
 [submodule "ufasta"]
 	path = ufasta
 	url = /software/distr/ufasta.git
+[submodule "samtools"]
+	path = samtools
+	url = /software/distr/samtools.git
