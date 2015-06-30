@@ -68,6 +68,9 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([[int x = 0;]],
 AM_CONDITIONAL([RELATIVE_PATHS], [true])
 AM_CONDITIONAL([HAVE_RELATIVE_JF_PATH], [false])
 
+# For Samtools, don't compile ncurses stuff
+AC_SUBST([CURSES_LIB], [0])
+
 
 AC_CHECK_TYPE([__int128],
               [AC_DEFINE([HAVE_INT128], [1], [Define if type __int128 is supported])])

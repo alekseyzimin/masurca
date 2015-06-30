@@ -40,7 +40,7 @@ $(BUILDDIR)/global: ./configure
 
 $(BUILDDIR)/CA: CA/build-default/tup.config CA/.tup/db
 	test -d $@ || (mkdir -p $(PWD)/CA/build-default; ln -sf $(PWD)/CA/build-default $@)
-	cd $@; export LD_RUN_PATH=$(LIBDIR); export PKG_CONFIG_PATH=$(PKGCONFIGDIR); echo $$PKG_CONFIG_PATH; tup upd
+	cd $@; export LD_RUN_PATH=$(LIBDIR); export PKG_CONFIG_PATH=$(PKGCONFIGDIR); tup upd
 	mkdir -p $(BUILDDIR)/inst/CA/Linux-amd64; rsync -a --delete $@/bin $(BUILDDIR)/inst/CA/Linux-amd64
 
 $(BUILDDIR)/CA8:
