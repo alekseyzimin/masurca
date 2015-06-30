@@ -24,7 +24,8 @@ AC_SUBST([JELLYFISH2_0_LIBS], ['-L$(libdir) -ljellyfish-2.0'])
 AC_SUBST([JELLYFISH], ['$(bindir)/jellyfish'])
 
 # Flags for samtools
-LDFLAGS="-L\$(libdir) $LDFLAGS"
+AC_SUBST([SAMTOOLS_CFLAGS], ['-I$(includedir)/samtools'])
+AC_SUBST([SAMTOOLS_LIBS], ['-L$(libdir) -lbam'])
 
 # On MacOS X, use _NSGetExecutablePath to find path to own executable
 AC_MSG_CHECKING([for _NSGetExecutablePath])
