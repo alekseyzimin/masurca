@@ -40,7 +40,7 @@ $(BUILDDIR)/global: ./configure
 
 $(BUILDDIR)/CA: CA/build-default/tup.config CA/.tup/db
 	test -d $@ || (mkdir -p $(PWD)/CA/build-default; ln -sf $(PWD)/CA/build-default $@)
-	cd $@; export LD_RUN_PATH=$(LIBDIR); tup upd
+	cd $@; export LD_RUN_PATH=$(LIBDIR); export PKG_CONFIG_PATH=$(PKGCONFIGDIR); echo $$PKG_CONFIG_PATH; tup upd
 	mkdir -p $(BUILDDIR)/inst/CA/Linux-amd64; rsync -a --delete $@/bin $(BUILDDIR)/inst/CA/Linux-amd64
 
 $(BUILDDIR)/CA8:
@@ -54,8 +54,8 @@ CA/build-default/tup.config:
 	(export PKG_CONFIG_PATH=$(PKGCONFIGDIR); \
 	 echo "CONFIG_CXXFLAGS=-Wno-error=format -Wno-error=unused-function -Wno-error=unused-variable -fopenmp"; \
          echo "CONFIG_LDFLAGS=-fopenmp"; \
-	 echo -n "CONFIG_JELLYFISH_CFLAGS="; pkg-config --cflags jellyfish-2.0; \
-	 echo -n "CONFIG_JELLYFISH_LIBS="; pkg-config --libs jellyfish-2.0 \
+	 echo "CONFIG_JELLYFISH_CFLAGS=-I$(INCDIR)/jellyfish-1"; \
+	 echo "CONFIG_JELLYFISH_LIBS=-L$(LIBDIR) -ljellyfish-2.0"; \
 	) > $@
 
 SOAPdenovo2/build-default/tup.config:
