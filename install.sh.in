@@ -26,8 +26,10 @@ export PKG_CONFIG_PATH=$LIBDIR/pkgconfig:$PKG_CONFIG_PATH
 
 if [ "$ROOT" != "$DEST" ]; then
     for i in CA CA8; do
-        mkdir -p $DEST/${i}/Linux-amd64/bin
-        cp -R ${i}/Linux-amd64/bin/* $DEST/${i}/Linux-amd64/bin
+        if [ -d ${i}/Linux-amd64/bin ]; then
+            mkdir -p $DEST/${i}/Linux-amd64/bin
+            cp -R ${i}/Linux-amd64/bin/* $DEST/${i}/Linux-amd64/bin
+        fi
     done
 fi
 
@@ -36,7 +38,9 @@ abs2rel () { perl -MFile::Spec -e 'print(File::Spec->abs2rel($ARGV[1], $ARGV[0])
 if [ -n "$MKREL" ]; then
     chrpath -k -r "\$ORIGIN"/$(abs2rel "$BINDIR" "$LIBDIR") "$BINDIR"/* 2>/dev/null || true
     for i in CA CA8; do
-        chrpath -k -r "\$ORIGIN"/$(abs2rel "$DEST"/$i/Linux-amd64/bin "$LIBDIR") "$DEST"/$i/Linux-amd64/bin/* 2>/dev/null || true
+        if [ -d "$DEST"/${i}/Linux-amd64/bin ]; then
+            chrpath -k -r "\$ORIGIN"/$(abs2rel "$DEST"/$i/Linux-amd64/bin "$LIBDIR") "$DEST"/$i/Linux-amd64/bin/* 2>/dev/null || true
+        fi
     done
 fi
 
