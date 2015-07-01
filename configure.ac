@@ -49,6 +49,15 @@ AM_CONDITIONAL([BOOST_REGEX], [test x$have_boost = xtrue])
 AC_FUNC_MMAP
 AC_CHECK_FUNCS([mremap])
 
+# Check for zlib
+AC_CHECK_HEADER([zlib.h], [], [AC_MSG_FAILURE([Cannot find zlib.h header. Install zlib development files (e.g. zlib1g-dev)])])
+AC_CHECK_LIB([z], [zlibVersion], [], [AC_MSG_FAILURE([Cannot find zlib library. Install zlib libray])])
+
+# Check bzip2 library
+AC_CHECK_HEADER([bzlib.h], [], [AC_MSG_FAILURE([Cannot find bzilb.h header. Install bzip2 development files (e.g. bzip2-devel)])])
+AC_CHECK_LIB([bz2], [BZ2_bzlibVersion], [], [AC_MSG_FAILURE([Cannot find bzip2 library. Install bzip2 library])])
+
+
 # Use valgrind to check memory allocation with mmap
 AC_ARG_ENABLE([valgrind],
               [AS_HELP_STRING([--enable-valgrind], [Instrument mmap memory allocation with valgrind])])
@@ -70,7 +79,6 @@ AM_CONDITIONAL([HAVE_RELATIVE_JF_PATH], [false])
 
 # For Samtools, don't compile ncurses stuff
 AC_SUBST([CURSES_LIB], [0])
-
 
 AC_CHECK_TYPE([__int128],
               [AC_DEFINE([HAVE_INT128], [1], [Define if type __int128 is supported])])
