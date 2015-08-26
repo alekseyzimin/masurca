@@ -4,7 +4,7 @@ VERSION = 3.1.3
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl hw.ncpu 2>/dev/null || echo 1)
 
 # Component versions
-COMPONENTS = global CA # CA8 # jellyfish PacBio prepare ufasta quorum SuperReads SOAPdenovo2
+COMPONENTS = global CA CA8 # jellyfish PacBio prepare ufasta quorum SuperReads SOAPdenovo2
 
 ##################################################################
 # Rules for compilling a working distribution in build (or DEST) #

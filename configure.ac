@@ -90,4 +90,5 @@ AS_IF([test "x$YAGGO" = "x"], [AC_PATH_PROG([YAGGO], [yaggo], [false])])
 
 AC_CONFIG_FILES([Makefile jellyfish/Makefile jellyfish/jellyfish-2.0.pc samtools/Makefile])
 AC_CONFIG_FILES([prepare/Makefile ufasta/Makefile quorum/Makefile SuperReads/Makefile SOAPdenovo2/Makefile])
+AC_CONFIG_FILES([PacBio/Makefile])
 AC_OUTPUT
