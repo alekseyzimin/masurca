@@ -14,6 +14,7 @@ PWD = $(shell pwd)
 PREF ?= $(PWD)
 # PREF ?= .
 BUILDDIR ?= $(PREF)/build
+BUILDNAME = $(notdir $(BUILDDIR))
 BINDIR = $(BUILDDIR)/inst/bin
 LIBDIR = $(BUILDDIR)/inst/lib
 INCDIR = $(BUILDDIR)/inst/include
@@ -38,10 +39,11 @@ $(BUILDDIR)/global: ./configure
 	$(call global_config,)
 	$(call make_install)
 
-$(BUILDDIR)/CA: CA/build-default/tup.config CA/.tup/db
-	test -d $@ || (mkdir -p $(PWD)/CA/build-default; ln -sf $(PWD)/CA/build-default $@)
-	cd $@; export LD_RUN_PATH=$(LIBDIR); export PKG_CONFIG_PATH=$(PKGCONFIGDIR); tup upd
-	mkdir -p $(BUILDDIR)/inst/CA/Linux-amd64; rsync -a --delete $@/bin $(BUILDDIR)/inst/CA/Linux-amd64
+$(BUILDDIR)/CA: CA/build-$(BUILDNAME)/tup.config CA/.tup/db
+	test -d $@ || (mkdir -p $(PWD)/CA/build-$(BUILDNAME) && ln -sf $(PWD)/CA/build-$(BUILDNAME) $@)
+	cd $@; export LD_RUN_PATH=$(LIBDIR); export PKG_CONFIG_PATH=$(PKGCONFIGDIR); tup upd .
+	mkdir -p $(BUILDDIR)/inst/CA/Linux-amd64
+	rsync -a --delete $@/bin $(BUILDDIR)/inst/CA/Linux-amd64
 
 $(BUILDDIR)/CA8:
 	[ -n "$$SKIP_CA8" ] || ( cd CA8/kmer && make install )
@@ -49,16 +51,17 @@ $(BUILDDIR)/CA8:
 	[ -n "$$SKIP_CA8" ] || ( cd CA8/src && make )
 	[ -n "$$SKIP_CA8" ] || ( mkdir -p $(BUILDDIR)/inst/CA8/Linux-amd64; rsync -a --delete CA8/Linux-amd64/bin $(BUILDDIR)/inst/CA8/Linux-amd64 )
 
-CA/build-default/tup.config:
+CA/build-$(BUILDNAME)/tup.config:
 	mkdir -p $(dir $@)
 	(export PKG_CONFIG_PATH=$(PKGCONFIGDIR); \
-	 echo "CONFIG_CXXFLAGS=-Wno-error=format -Wno-error=unused-function -Wno-error=unused-variable -fopenmp"; \
-         echo "CONFIG_LDFLAGS=-fopenmp"; \
+	 [ -n "$(CXX)" ] && echo "CONFIG_CXX=$(CXX)"; \
+	 echo "CONFIG_CXXFLAGS=-Wno-error=format -Wno-error=unused-function -Wno-error=unused-variable -fopenmp $(CXXFLAGS)"; \
+         echo "CONFIG_LDFLAGS=-fopenmp $(LDFLAGS)"; \
 	 echo "CONFIG_JELLYFISH_CFLAGS=-I$(INCDIR)/jellyfish-1"; \
 	 echo "CONFIG_JELLYFISH_LIBS=-L$(LIBDIR) -ljellyfish-2.0"; \
 	) > $@
 
-SOAPdenovo2/build-default/tup.config:
+SOAPdenovo2/build-$(BUILDNAME)/tup.config:
 	mkdir -p $(dir $@)
 	echo "CONFIG_CFLAGS=-O3" > $@
 

@@ -28,3 +28,6 @@
 [submodule "samtools"]
 	path = samtools
 	url = /software/distr/samtools.git
+[submodule "MUMmer"]
+	path = MUMmer
+	url = /software/distr/MUMmer.git
