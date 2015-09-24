@@ -88,7 +88,22 @@ AC_CHECK_TYPE([__int128],
 AC_ARG_VAR([YAGGO], [Yaggo switch parser generator])
 AS_IF([test "x$YAGGO" = "x"], [AC_PATH_PROG([YAGGO], [yaggo], [false])])
 
-AC_CONFIG_FILES([Makefile jellyfish/Makefile jellyfish/jellyfish-2.0.pc samtools/Makefile])
+# Check for swig and enable Perl bindings
+AX_PKG_SWIG([3.0.0], [], [AC_MSG_FAILURE([SWIG version 3 is required])])
+SWIG_ENABLE_CXX
+AM_CONDITIONAL([HAVE_SWIG], [true])
+AC_SUBST([MAYBE_SWIG], [swig])
+# Conf Perl
+PERL_EXT_LIB='$(libdir)/perl'
+AX_PERL_EXT
+AM_CONDITIONAL([PERL_BINDING], [true])
+# Disable others
+AM_CONDITIONAL([PYTHON_BINDING], [false])
+AM_CONDITIONAL([RUBY_BINDING], [false])
+
+# Output configuration files
+AC_CONFIG_FILES([Makefile samtools/Makefile jellyfish/Makefile jellyfish/jellyfish-2.0.pc jellyfish/swig/Makefile])
 AC_CONFIG_FILES([prepare/Makefile ufasta/Makefile quorum/Makefile SuperReads/Makefile SOAPdenovo2/Makefile])
-AC_CONFIG_FILES([PacBio/Makefile MUMmer/Makefile MUMmer/tests/Makefile])
+AC_CONFIG_FILES([PacBio/Makefile])
+AC_CONFIG_FILES([MUMmer/Makefile MUMmer/tests/Makefile MUMmer/swig/Makefile])
 AC_OUTPUT
