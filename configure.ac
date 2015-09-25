@@ -89,9 +89,14 @@ AC_ARG_VAR([YAGGO], [Yaggo switch parser generator])
 AS_IF([test "x$YAGGO" = "x"], [AC_PATH_PROG([YAGGO], [yaggo], [false])])
 
 # Check for swig and enable Perl bindings
-AX_PKG_SWIG([3.0.0], [], [AC_MSG_FAILURE([SWIG version 3 is required])])
-SWIG_ENABLE_CXX
-AM_CONDITIONAL([HAVE_SWIG], [true])
+# --enable-swig
+AC_ARG_ENABLE([swig],
+              [AC_HELP_STRING([--enable-swig], [enable development of swig binding])])
+AS_IF([test x$enable_swig = xyes],
+      [AX_PKG_SWIG([3.0.0], [], [AC_MSG_FAILURE([SWIG version 3 is required])])])
+AS_IF([test -n "$SWIG"],
+      [SWIG_ENABLE_CXX])
+AM_CONDITIONAL([HAVE_SWIG], [test -n "$SWIG"])
 AC_SUBST([MAYBE_SWIG], [swig])
 # Conf Perl
 PERL_EXT_LIB='$(libdir)/perl'

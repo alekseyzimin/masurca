@@ -20,7 +20,7 @@ LIBDIR = $(BUILDDIR)/inst/lib
 INCDIR = $(BUILDDIR)/inst/include
 
 SUBDIRS = $(foreach i,$(COMPONENTS),$(BUILDDIR)/$(i))
-global_config = test -f $@/Makefile -a $@/Makefile -nt configure.ac || (cd $@; $(PWD)/configure --prefix=$(BUILDDIR)/inst --libdir=$(LIBDIR) $(1))
+global_config = test -f $@/Makefile -a $@/Makefile -nt configure.ac || (cd $@; $(PWD)/configure --prefix=$(BUILDDIR)/inst --libdir=$(LIBDIR) --enable-swig $(1))
 make_install = $(MAKE) -C $@ -j $(NCPU) install INSTALL="$(UPD_INSTALL)"
 
 # Get info of where things are installed
