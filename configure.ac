@@ -35,15 +35,9 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <mach-o/dyld.h>]],
                   [AC_DEFINE([HAVE_NSGETEXECUTABLEPATH], [1], [Used to find executable path on MacOS X])],
                   [AC_MSG_RESULT([no])])
 
-# AC_CHECK_LIB(boost_regex, toto)
-AC_MSG_CHECKING([for libboost_regex])
-AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <boost/regex.hpp>],
-                                [boost::regex regexp])],
-                                [AC_MSG_RESULT([yes])] [AC_DEFINE([HAVE_BOOST_REGEX], 1, [Have libboost_regex])]
-                                                       [have_boost=true],
-                                [AC_MSG_RESULT([no])]
-                                [have_boost=false])
-AM_CONDITIONAL([BOOST_REGEX], [test x$have_boost = xtrue])
+# Disable boost_regex
+AM_CONDITIONAL([BOOST_REGEX], [false])
+
 
 # Checks for library functions.
 AC_FUNC_MMAP
