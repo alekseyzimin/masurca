@@ -4,9 +4,6 @@
 [submodule "SuperReads"]
 	path = SuperReads
 	url = /software/distr/SuperReads
-[submodule "wgs"]
-	path = CA
-	url = /software/distr/wgs
 [submodule "jellyfish"]
 	path = jellyfish
 	url = /software/distr/jellyfish

@@ -4,7 +4,7 @@ VERSION = 3.1.3
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl hw.ncpu 2>/dev/null || echo 1)
 
 # Component versions
-COMPONENTS = global CA CA8 # jellyfish PacBio prepare ufasta quorum SuperReads SOAPdenovo2
+COMPONENTS = global CA8 # jellyfish PacBio prepare ufasta quorum SuperReads SOAPdenovo2
 
 ##################################################################
 # Rules for compilling a working distribution in build (or DEST) #
@@ -39,27 +39,10 @@ $(BUILDDIR)/global: ./configure
 	$(call global_config,)
 	$(call make_install)
 
-$(BUILDDIR)/CA: CA/build-$(BUILDNAME)/tup.config CA/.tup/db
-	test -d $@ || (mkdir -p $(PWD)/CA/build-$(BUILDNAME) && ln -sf $(PWD)/CA/build-$(BUILDNAME) $@)
-	cd $@; export LD_RUN_PATH=$(LIBDIR); export PKG_CONFIG_PATH=$(PKGCONFIGDIR); tup upd .
-	mkdir -p $(BUILDDIR)/inst/CA/Linux-amd64
-	rsync -a --delete $@/bin $(BUILDDIR)/inst/CA/Linux-amd64
-
 $(BUILDDIR)/CA8:
 	[ -n "$$SKIP_CA8" ] || ( cd CA8/kmer && make install )
-#	[ -n "$$SKIP_CA8" ] || ( cd CA8/samtools && make )
 	[ -n "$$SKIP_CA8" ] || ( cd CA8/src && make )
 	[ -n "$$SKIP_CA8" ] || ( mkdir -p $(BUILDDIR)/inst/CA8/Linux-amd64; rsync -a --delete CA8/Linux-amd64/bin $(BUILDDIR)/inst/CA8/Linux-amd64 )
-
-CA/build-$(BUILDNAME)/tup.config:
-	mkdir -p $(dir $@)
-	(export PKG_CONFIG_PATH=$(PKGCONFIGDIR); \
-	 [ -n "$(CXX)" ] && echo "CONFIG_CXX=$(CXX)"; \
-	 echo "CONFIG_CXXFLAGS=-Wno-error=format -Wno-error=unused-function -Wno-error=unused-variable -fopenmp $(CXXFLAGS)"; \
-         echo "CONFIG_LDFLAGS=-fopenmp $(LDFLAGS)"; \
-	 echo "CONFIG_JELLYFISH_CFLAGS=-I$(INCDIR)/jellyfish-1"; \
-	 echo "CONFIG_JELLYFISH_LIBS=-L$(LIBDIR) -ljellyfish-2.0"; \
-	) > $@
 
 SOAPdenovo2/build-$(BUILDNAME)/tup.config:
 	mkdir -p $(dir $@)
@@ -112,7 +95,7 @@ $(DISTDIST)/$1:
 	(tar c $1) | (cd $(DISTDIST); tar -x)
 endef
 
-$(foreach d,CA CA8 SOAPdenovo2,$(eval $(call GIT_TAR,$d)))
+$(foreach d,CA8 SOAPdenovo2,$(eval $(call GIT_TAR,$d)))
 
 $(DISTDIST)/install.sh: install.sh.in
 	install $< $@

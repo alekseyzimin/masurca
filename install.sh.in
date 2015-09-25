@@ -19,13 +19,11 @@ LIBDIR=$DEST/lib
 export PKG_CONFIG_PATH=$LIBDIR/pkgconfig:$PKG_CONFIG_PATH
 (cd global-1 && ./configure --prefix=$DEST --bindir=$BINDIR --libdir=$LIBDIR && make -j $NUM_THREADS install)
 
-(cd CA/src && make LD_RUN_PATH="$LIBDIR")
 (cd CA8/kmer && make install)
-# (cd CA8/samtools && make)
 (cd CA8/src && make)
 
 if [ "$ROOT" != "$DEST" ]; then
-    for i in CA CA8; do
+    for i in CA8; do
         if [ -d ${i}/Linux-amd64/bin ]; then
             mkdir -p $DEST/${i}/Linux-amd64/bin
             cp -R ${i}/Linux-amd64/bin/* $DEST/${i}/Linux-amd64/bin
@@ -37,7 +35,7 @@ abs2rel () { perl -MFile::Spec -e 'print(File::Spec->abs2rel($ARGV[1], $ARGV[0])
 
 if [ -n "$MKREL" ]; then
     chrpath -k -r "\$ORIGIN"/$(abs2rel "$BINDIR" "$LIBDIR") "$BINDIR"/* 2>/dev/null || true
-    for i in CA CA8; do
+    for i in CA8; do
         if [ -d "$DEST"/${i}/Linux-amd64/bin ]; then
             chrpath -k -r "\$ORIGIN"/$(abs2rel "$DEST"/$i/Linux-amd64/bin "$LIBDIR") "$DEST"/$i/Linux-amd64/bin/* 2>/dev/null || true
         fi
