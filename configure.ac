@@ -26,8 +26,18 @@ AC_CHECK_TYPE([__int128],
               [AC_DEFINE([HAVE_INT128], [1], [Define if type __int128 is supported])])
 
 
-# Check for Boost
-BOOST_REQUIRE([1.46.0])
+# Check for Boost, and install if asked to
+AS_IF([test x$BOOST_ROOT = xinstall],
+      AS_IF([test ! -f include/boost/version.hpp],
+            [AS_BOX([Installing Boost 1.59.0 from the Internet into include/boost])]
+            [AS_MKDIR_P([include])]
+            [curl -L http://downloads.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.bz2 | tar -jx -C include --strip-components=1 boost_1_59_0/boost]
+            [AS_IF([test x$? != x0], [AC_MSG_FAILURE([failed to install Boost from the Internet])])])
+      [BOOST_ROOT=`pwd`/include])
+
+BOOST_REQUIRE([1.46.0],
+              [AS_BOX([Could not find a working installation of Boost. Set BOOST_ROOT to the path where the Boost headers are installed or set BOOST_ROOT=install to have it downloaded from the Internet and installed locally. For example: BOOST_ROOT=install ./install.sh])]
+              [AC_MSG_FAILURE([cannot find Boost])])
 BOOST_FIND_HEADER([boost/icl/interval_set.hpp])
 
 # For ufasta, disable regex unconditionally
