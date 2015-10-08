@@ -22,6 +22,16 @@ AC_SEARCH_LIBS([clock_gettime], [rt], [AC_DEFINE([HAVE_CLOCK_GETTIME], [1], [Def
 AC_SUBST([JELLYFISH2_0_CFLAGS], ['-I$(includedir)/jellyfish-1'])
 AC_SUBST([JELLYFISH2_0_LIBS], ['-L$(libdir) -ljellyfish-2.0'])
 AC_SUBST([JELLYFISH], ['$(bindir)/jellyfish'])
+AC_CHECK_TYPE([__int128],
+              [AC_DEFINE([HAVE_INT128], [1], [Define if type __int128 is supported])])
+
+
+# Check for Boost
+BOOST_REQUIRE([1.46.0])
+BOOST_FIND_HEADER([boost/icl/interval_set.hpp])
+
+# For ufasta, disable regex unconditionally
+AM_CONDITIONAL([HAVE_BOOST_REGEX], [false])
 
 # Flags for samtools
 AC_SUBST([SAMTOOLS_CFLAGS], ['-I$(includedir)/samtools'])
@@ -34,10 +44,6 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <mach-o/dyld.h>]],
                   [AC_MSG_RESULT([yes])]
                   [AC_DEFINE([HAVE_NSGETEXECUTABLEPATH], [1], [Used to find executable path on MacOS X])],
                   [AC_MSG_RESULT([no])])
-
-# Disable boost_regex
-AM_CONDITIONAL([BOOST_REGEX], [false])
-
 
 # Checks for library functions.
 AC_FUNC_MMAP
@@ -74,9 +80,27 @@ AM_CONDITIONAL([HAVE_RELATIVE_JF_PATH], [false])
 # For Samtools, don't compile ncurses stuff
 AC_SUBST([CURSES_LIB], [0])
 
-AC_CHECK_TYPE([__int128],
-              [AC_DEFINE([HAVE_INT128], [1], [Define if type __int128 is supported])])
+# For CA
+AC_MSG_CHECKING([for architecture])
+OSTYPE=`uname`
+OSVERSION=`uname -r`
+MACHINETYPE=`uname -m`
+AS_CASE([$MACHINETYPE],
+        ["x86_64"], [MACHINETYPE=amd64],
+        ["Power Macintosh"], [MACHINETYPE=ppc])
+AS_IF([test x$OSTYPE = xSunOS],
+      [MACHINETYPE=`uname -p`]
+      [AS_IF([text x$MACHINETYPE = xsparc],
+             [MACHINETYPE=sparc`/usr/bin/isainfo -b`])])
+AC_SUBST([OSTYPE])
+AC_SUBST([OSVERSION])
+AC_SUBST([MACHINETYPE])
+AC_SUBST([LOCAL_NAME], [$OSTYPE-$MACHINETYPE])
+AC_MSG_RESULT([$LOCAL_NAME])
 
+AM_CONDITIONAL([SITE_LOCAL], [true])
+AM_CONDITIONAL([SITE_JCVI], [false])
+AM_CONDITIONAL([SITE_BRI], [false])
 
 # Check for yaggo
 AC_ARG_VAR([YAGGO], [Yaggo switch parser generator])
@@ -101,8 +125,15 @@ AM_CONDITIONAL([PYTHON_BINDING], [false])
 AM_CONDITIONAL([RUBY_BINDING], [false])
 
 # Output configuration files
-AC_CONFIG_FILES([Makefile samtools/Makefile jellyfish/Makefile jellyfish/jellyfish-2.0.pc jellyfish/swig/Makefile])
-AC_CONFIG_FILES([prepare/Makefile ufasta/Makefile quorum/Makefile SuperReads/Makefile SOAPdenovo2/Makefile])
-AC_CONFIG_FILES([PacBio/Makefile])
-AC_CONFIG_FILES([MUMmer/Makefile MUMmer/tests/Makefile MUMmer/swig/Makefile])
+AC_CONFIG_FILES([Makefile])
+m4_map_args_w([samtools prepare ufasta quorum SuperReads SOAPdenovo2 PacBio CA8 jellyfish jellyfish/swig MUMmer MUMmer/tests MUMmer/swig],
+              [AC_CONFIG_FILES(], [/Makefile)])
+AC_CONFIG_FILES([jellyfish/jellyfish-2.0.pc])
+#AC_CONFIG_FILES([samtools/Makefile])
+#AC_CONFIG_FILES([jellyfish/Makefile jellyfish/jellyfish-2.0.pc jellyfish/swig/Makefile])
+#AC_CONFIG_FILES([prepare/Makefile])
+#AC_CONFIG_FILES([ufasta/Makefile quorum/Makefile SuperReads/Makefile SOAPdenovo2/Makefile])
+#AC_CONFIG_FILES([PacBio/Makefile])
+#AC_CONFIG_FILES([MUMmer/Makefile MUMmer/tests/Makefile MUMmer/swig/Makefile])
+#AC_CONFIG_FILES([CA8/Makefile])
 AC_OUTPUT
