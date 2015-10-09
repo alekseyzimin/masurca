@@ -1,4 +1,4 @@
-SUBDIRS = jellyfish samtools prepare ufasta quorum SuperReads SOAPdenovo2 PacBio MUMmer CA8
+SUBDIRS = jellyfish samtools prepare ufasta quorum SuperReads SOAPdenovo2 PacBio MUMmer CA CA8
 ACLOCAL_AMFLAGS = -I m4
 
 install-special:

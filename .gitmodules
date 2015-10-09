@@ -28,3 +28,6 @@
 [submodule "MUMmer"]
 	path = MUMmer
 	url = /software/distr/MUMmer.git
+[submodule "CA"]
+	path = CA
+	url = /software/distr/wgs
