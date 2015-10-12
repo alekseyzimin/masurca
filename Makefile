@@ -4,7 +4,7 @@ VERSION = 3.1.3
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl hw.ncpu 2>/dev/null || echo 1)
 
 # Component versions
-COMPONENTS = global # CA8  jellyfish PacBio prepare ufasta quorum SuperReads SOAPdenovo2
+COMPONENTS = global
 
 ##################################################################
 # Rules for compilling a working distribution in build (or DEST) #
@@ -36,6 +36,12 @@ $(BUILDDIR)/global: ./configure
 
 configure: configure.ac
 	autoreconf -fi
+
+SHORTCUTS = CA CA8 jellyfish PacBio prepare ufasta quorum SuperReads SOAPdenovo2
+.PHONY: $(SHORTCUTS)
+$(SHORTCUTS):
+	$(MAKE) -C build/global/$@ install INSTALL="$(UPD_INSTALL)"
+
 
 #############################################
 # Tag all components with MaSuRCA's version #
