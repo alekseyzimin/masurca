@@ -137,6 +137,6 @@ AM_CONDITIONAL([RUBY_BINDING], [false])
 # Output configuration files
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([jellyfish/jellyfish-2.0.pc])
-m4_map_args_w([samtools prepare ufasta quorum SuperReads SOAPdenovo2 PacBio CA CA8 jellyfish jellyfish/swig MUMmer MUMmer/tests MUMmer/swig],
+m4_map_args_w([samtools prepare ufasta quorum SuperReads SOAPdenovo2 PacBio CA CA8 jellyfish jellyfish/swig MUMmer],
               [AC_CONFIG_FILES(], [/Makefile)])
 AC_OUTPUT
