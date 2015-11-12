@@ -31,7 +31,7 @@ all: $(SUBDIRS)
 $(BUILDDIR)/global: ./configure
 	mkdir -p $@
 	test -f $@/Makefile -a $@/Makefile -nt configure.ac || \
-	  (cd $@; $(PWD)/configure --prefix=$(BUILDDIR)/inst --libdir=$(LIBDIR) --enable-swig)
+	  (cd $@; $(PWD)/configure --prefix=$(BUILDDIR)/inst --libdir=$(LIBDIR) --enable-swig BOOST_ROOT=/software/Linux64/include)
 	$(MAKE) -C $@ -j $(NCPU) install-special INSTALL="$(UPD_INSTALL)"
 
 configure: configure.ac
