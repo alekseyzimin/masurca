@@ -55,6 +55,24 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <mach-o/dyld.h>]],
                   [AC_DEFINE([HAVE_NSGETEXECUTABLEPATH], [1], [Used to find executable path on MacOS X])],
                   [AC_MSG_RESULT([no])])
 
+# For MUMmer, check for std::thread::sleep_for
+AC_SUBST([EXTRA_CXXFLAGS])
+AC_MSG_CHECKING([if std::thread::sleep_for is supported])
+try_nano_sleep=
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <thread>]],
+                                   [[std::this_thread::sleep_for(std::chrono::seconds(1))]])],
+                  [AC_MSG_RESULT([yes])], [try_nano_sleep=yes])
+AS_IF([test x$try_nano_sleep = xyes],
+      [save_cxxflags="$CXXFLAGS"]
+      [CXXFLAGS="-D_GLIBCXX_USE_NANOSLEEP $CXXFLAGS"]
+      [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <thread>]],
+                                         [[std::this_thread::sleep_for(std::chrono::seconds(1))]])],
+                         [AC_MSG_RESULT([yes])]
+                         [EXTRA_CXXFLAGS="-D_GLIBCXX_USE_NANOSLEEP $CXXFLAGS"],
+                         [AC_MSG_RESULT([no])]
+                         [AC_MSG_FAILURE([Compiler does not support std::this_thread::sleep_for])])]
+      [CXXFLAGS="$save_cxxflags"])
+
 # Checks for library functions.
 AC_FUNC_MMAP
 AC_CHECK_FUNCS([mremap])
