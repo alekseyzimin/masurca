@@ -8,15 +8,21 @@ AC_CONFIG_HEADERS([config.h])
 AC_PROG_LIBTOOL
 
 # Change default compilation flags
-AC_SUBST([ALL_CXXFLAGS], [-std=c++0x])
-CXXFLAGS="-std=c++0x $CXXFLAGS"
+AS_IF([test -z "$CXXFLAGS"], [cxxflags_given=no], [cxxflags_given=yes])
 AC_LANG(C++)
 AC_PROG_CC
 AC_PROG_CXX
 
 # Checks for libraries.
+CXXFLAGS="-std=c++0x $CXXFLAGS"
+AS_IF([test x$cxxflags_given = xno], [CXXFLAGS="-DNDEBUG $CXXFLAGS"])
+EXTRA_CXXFLAGS="-std=c++0x"
+AC_SUBST([EXTRA_CXXFLAGS])
+ALL_CXXFLAGS="$EXTRA_CXXFLAG"
+AC_SUBST([ALL_CXXFLAGS])
+
 AC_CHECK_LIB([pthread], [pthread_create])
-AC_SEARCH_LIBS([clock_gettime], [rt], [AC_DEFINE([HAVE_CLOCK_GETTIME], [1], [Define to 1 if you have the `clock_gettime' function])])
+AC_SEARCH_LIBS([clock_gettime], [rt], [AC_DEFINE([HAVE_CLOCK_GETTIME], [1], [Define to 1 if you have the 'clock_gettime' function])])
 
 # Flags for Jellyfish
 AC_SUBST([JELLYFISH2_0_CFLAGS], ['-I$(includedir)/jellyfish-1'])
