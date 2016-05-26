@@ -31,6 +31,14 @@ AC_SUBST([JELLYFISH], ['$(bindir)/jellyfish'])
 AC_CHECK_TYPE([__int128],
               [AC_DEFINE([HAVE_INT128], [1], [Define if type __int128 is supported])])
 
+# Check for openmp
+AC_ARG_ENABLE([openmp], [AS_HELP_STRING([--disable-openmp], [Disable OpenMP, even if available])])
+AS_IF([test "x$enable_openmp" != "xno"],
+      # OpenMP enabled. Check if available
+      [AX_OPENMP([AC_DEFINE(HAVE_OPENMP,1,[Define if OpenMP is enabled])])]
+      [EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS $OPENMP_CXXFLAGS"],
+      # OpenMP disabled. Ignore pragma warnings
+      [EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS -Wno-unknown-pragmas"])
 
 # Check for Boost, and install if asked to
 AS_IF([test x$BOOST_ROOT = xinstall],
@@ -74,7 +82,7 @@ AS_IF([test x$try_nano_sleep = xyes],
       [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <thread>]],
                                          [[std::this_thread::sleep_for(std::chrono::seconds(1))]])],
                          [AC_MSG_RESULT([yes])]
-                         [EXTRA_CXXFLAGS="-D_GLIBCXX_USE_NANOSLEEP $CXXFLAGS"],
+                         [EXTRA_CXXFLAGS="-D_GLIBCXX_USE_NANOSLEEP $EXTRA_CXXFLAGS"],
                          [AC_MSG_RESULT([no])]
                          [AC_MSG_FAILURE([Compiler does not support std::this_thread::sleep_for])])]
       [CXXFLAGS="$save_cxxflags"])
