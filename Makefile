@@ -1,6 +1,6 @@
 # MaSurCA version
 NAME=MaSuRCA
-VERSION = 3.2.1
+VERSION = 3.2.1_06302016
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl hw.ncpu 2>/dev/null || echo 1)
 
 # Component versions
@@ -90,15 +90,20 @@ $(DISTDIST)/install.sh: install.sh.in
 $(DISTDIST)/PkgConfig.pm: PkgConfig.pm
 	install $< $@
 
+$(DISTDIST)/LICENSE.txt: LICENSE.txt
+	install $< $@
+
 DIST_COMPONENTS = $(foreach comp,$(COMPONENTS),$(DISTDIST)/$(comp))
 
-$(DISTNAME).tar.gz: clean_distdir $(DIST_COMPONENTS) $(DISTDIST)/install.sh $(DISTDIST)/PkgConfig.pm
+EXTRA_DIST = $(DISTDIST)/install.sh $(DISTDIST)/PkgConfig.pm $(DISTDIST)/LICENSE.txt
+
+$(DISTNAME).tar.gz: clean_distdir $(DIST_COMPONENTS)  $(EXTRA_DIST)
 	tar -zcPf $@ --xform 's|^$(DISTDIR)||' $(DISTDIST)
 
-$(DISTNAME).tar.bz: clean_distdir $(DIST_COMPONENTS) $(DISTDIST)/install.sh $(DISTDIST)/PkgConfig.pm
+$(DISTNAME).tar.bz: clean_distdir $(DIST_COMPONENTS) $(EXTRA_DIST)
 	tar -jcPf $@ --xform 's|^$(DISTDIR)||' $(DISTDIST)
 
-$(DISTNAME).tar.xz: clean_distdir $(DIST_COMPONENTS) $(DISTDIST)/install.sh $(DISTDIST)/PkgConfig.pm
+$(DISTNAME).tar.xz: clean_distdir $(DIST_COMPONENTS) $(EXTRA_DIST)
 	tar -JcPf $@ --xform 's|^$(DISTDIR)||' $(DISTDIST)
 
 .PHONY: dist dist-all

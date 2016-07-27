@@ -1,6 +1,8 @@
 SUBDIRS = jellyfish samtools prepare ufasta quorum SuperReads SOAPdenovo2 PacBio MUMmer CA CA8
 ACLOCAL_AMFLAGS = -I m4
 
+EXTRA_DIST = LICENSE.txt
+
 install-special:
 	@echo $(SUBDIRS) | tr ' ' '\n' | grep -v '^CA' | while read subdir; do \
 	  echo "Making install in $$subdir pwd `pwd`"; \
