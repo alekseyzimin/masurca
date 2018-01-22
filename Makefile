@@ -1,10 +1,10 @@
 # MaSurCA version
 NAME=MaSuRCA
-VERSION = 3.1.0
+VERSION = 3.2.4
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl hw.ncpu 2>/dev/null || echo 1)
 
 # Component versions
-COMPONENTS = global CA # CA8 # jellyfish PacBio prepare ufasta quorum SuperReads SOAPdenovo2
+COMPONENTS = global
 
 ##################################################################
 # Rules for compilling a working distribution in build (or DEST) #
@@ -14,13 +14,12 @@ PWD = $(shell pwd)
 PREF ?= $(PWD)
 # PREF ?= .
 BUILDDIR ?= $(PREF)/build
+BUILDNAME = $(notdir $(BUILDDIR))
 BINDIR = $(BUILDDIR)/inst/bin
 LIBDIR = $(BUILDDIR)/inst/lib
 INCDIR = $(BUILDDIR)/inst/include
 
 SUBDIRS = $(foreach i,$(COMPONENTS),$(BUILDDIR)/$(i))
-global_config = test -f $@/Makefile -a $@/Makefile -nt configure.ac || (cd $@; $(PWD)/configure --prefix=$(BUILDDIR)/inst --libdir=$(LIBDIR) $(1))
-make_install = $(MAKE) -C $@ -j $(NCPU) install INSTALL="$(UPD_INSTALL)"
 
 # Get info of where things are installed
 PKGCONFIGDIR = $(BUILDDIR)/inst/lib/pkgconfig
@@ -29,46 +28,20 @@ PKGCONFIGDIR = $(BUILDDIR)/inst/lib/pkgconfig
 
 all: $(SUBDIRS)
 
-# Not all submodule use develop
-# pull:
-# 	for i in $(COMPONENTS); do (cd $$i; git checkout develop; git pull); done
-
 $(BUILDDIR)/global: ./configure
 	mkdir -p $@
-	$(call global_config,)
-	$(call make_install)
-
-$(BUILDDIR)/CA: CA/build-default/tup.config CA/.tup/db
-	test -d $@ || (mkdir -p $(PWD)/CA/build-default; ln -sf $(PWD)/CA/build-default $@)
-	cd $@; export LD_RUN_PATH=$(LIBDIR); export PKG_CONFIG_PATH=$(PKGCONFIGDIR); tup upd
-	mkdir -p $(BUILDDIR)/inst/CA/Linux-amd64; rsync -a --delete $@/bin $(BUILDDIR)/inst/CA/Linux-amd64
-
-$(BUILDDIR)/CA8:
-	[ -n "$$SKIP_CA8" ] || ( cd CA8/kmer && make install )
-#	[ -n "$$SKIP_CA8" ] || ( cd CA8/samtools && make )
-	[ -n "$$SKIP_CA8" ] || ( cd CA8/src && make )
-	[ -n "$$SKIP_CA8" ] || ( mkdir -p $(BUILDDIR)/inst/CA8/Linux-amd64; rsync -a --delete CA8/Linux-amd64/bin $(BUILDDIR)/inst/CA8/Linux-amd64 )
-
-CA/build-default/tup.config:
-	mkdir -p $(dir $@)
-	(export PKG_CONFIG_PATH=$(PKGCONFIGDIR); \
-	 echo "CONFIG_CXXFLAGS=-Wno-error=format -Wno-error=unused-function -Wno-error=unused-variable -fopenmp"; \
-         echo "CONFIG_LDFLAGS=-fopenmp"; \
-	 echo "CONFIG_JELLYFISH_CFLAGS=-I$(INCDIR)/jellyfish-1"; \
-	 echo "CONFIG_JELLYFISH_LIBS=-L$(LIBDIR) -ljellyfish-2.0"; \
-	) > $@
-
-SOAPdenovo2/build-default/tup.config:
-	mkdir -p $(dir $@)
-	echo "CONFIG_CFLAGS=-O3" > $@
-
-
-
-%/.tup/db:
-	cd $*; tup init
+	test -f $@/Makefile -a $@/Makefile -nt configure.ac || \
+	  (cd $@; $(PWD)/configure --prefix=$(BUILDDIR)/inst --libdir=$(LIBDIR) --enable-swig BOOST_ROOT=/software/Linux64/include)
+	$(MAKE) -C $@ -j $(NCPU) install-special INSTALL="$(UPD_INSTALL)"
 
 configure: configure.ac
 	autoreconf -fi
+
+SHORTCUTS = CA CA8 jellyfish PacBio prepare ufasta quorum SuperReads SOAPdenovo2
+.PHONY: $(SHORTCUTS)
+$(SHORTCUTS):
+	$(MAKE) -C build/global/$@ install INSTALL="$(UPD_INSTALL)"
+
 
 #############################################
 # Tag all components with MaSuRCA's version #
@@ -109,7 +82,7 @@ $(DISTDIST)/$1:
 	(tar c $1) | (cd $(DISTDIST); tar -x)
 endef
 
-$(foreach d,CA CA8 SOAPdenovo2,$(eval $(call GIT_TAR,$d)))
+# $(foreach d,CA8 SOAPdenovo2,$(eval $(call GIT_TAR,$d)))
 
 $(DISTDIST)/install.sh: install.sh.in
 	install $< $@
@@ -117,15 +90,20 @@ $(DISTDIST)/install.sh: install.sh.in
 $(DISTDIST)/PkgConfig.pm: PkgConfig.pm
 	install $< $@
 
+$(DISTDIST)/LICENSE.txt: LICENSE.txt
+	install $< $@
+
 DIST_COMPONENTS = $(foreach comp,$(COMPONENTS),$(DISTDIST)/$(comp))
 
-$(DISTNAME).tar.gz: clean_distdir $(DIST_COMPONENTS) $(DISTDIST)/install.sh $(DISTDIST)/PkgConfig.pm
+EXTRA_DIST = $(DISTDIST)/install.sh $(DISTDIST)/PkgConfig.pm $(DISTDIST)/LICENSE.txt
+
+$(DISTNAME).tar.gz: clean_distdir $(DIST_COMPONENTS)  $(EXTRA_DIST)
 	tar -zcPf $@ --xform 's|^$(DISTDIR)||' $(DISTDIST)
 
-$(DISTNAME).tar.bz: clean_distdir $(DIST_COMPONENTS) $(DISTDIST)/install.sh $(DISTDIST)/PkgConfig.pm
+$(DISTNAME).tar.bz: clean_distdir $(DIST_COMPONENTS) $(EXTRA_DIST)
 	tar -jcPf $@ --xform 's|^$(DISTDIR)||' $(DISTDIST)
 
-$(DISTNAME).tar.xz: clean_distdir $(DIST_COMPONENTS) $(DISTDIST)/install.sh $(DISTDIST)/PkgConfig.pm
+$(DISTNAME).tar.xz: clean_distdir $(DIST_COMPONENTS) $(EXTRA_DIST)
 	tar -JcPf $@ --xform 's|^$(DISTDIR)||' $(DISTDIST)
 
 .PHONY: dist dist-all
