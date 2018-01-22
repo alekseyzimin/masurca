@@ -6,7 +6,7 @@
 	url = https://github.com/alekseyzimin/SuperReads.git
 [submodule "wgs"]
 	path = CA
-	url = https://github.com/alekseyzimin/wgs-8.git
+	url = https://github.com/alekseyzimin/wgs.git
 [submodule "jellyfish"]
 	path = jellyfish
 	url = https://github.com/alekseyzimin/Jellyfish.git
