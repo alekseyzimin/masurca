@@ -1,33 +1,33 @@
 [submodule "quorum"]
 	path = quorum
-	url = /software/distr/quorum
+	url = https://github.com/alekseyzimin/Quorum.git
 [submodule "SuperReads"]
 	path = SuperReads
-	url = /software/distr/SuperReads
+	url = https://github.com/alekseyzimin/SuperReads.git
+[submodule "wgs"]
+	path = CA
+	url = https://github.com/alekseyzimin/wgs-8.git
 [submodule "jellyfish"]
 	path = jellyfish
-	url = /software/distr/jellyfish
+	url = https://github.com/alekseyzimin/Jellyfish.git
 [submodule "PacBio"]
 	path = PacBio
-	url = /software/distr/PacBio
+	url = https://github.com/alekseyzimin/PacBio.git
 [submodule "wgs-8"]
 	path = CA8
-	url = /software/distr/wgs-8.git
+	url = https://github.com/alekseyzimin/wgs-8.git
 [submodule "SOAPdenovo2"]
 	path = SOAPdenovo2
-	url = /software/distr/SOAPdenovo2.git
+	url = https://github.com/alekseyzimin/SOAPdenovo2.git
 [submodule "prepare"]
 	path = prepare
-	url = /software/distr/prepare.git
+	url = https://github.com/alekseyzimin/prepare.git
 [submodule "ufasta"]
 	path = ufasta
-	url = /software/distr/ufasta.git
+	url = https://github.com/alekseyzimin/ufasta.git
 [submodule "samtools"]
 	path = samtools
-	url = /software/distr/samtools.git
-[submodule "MUMmer"]
+	url = https://github.com/alekseyzimin/samtools.git
+[submodule "mummer4"]
 	path = MUMmer
-	url = /software/distr/MUMmer.git
-[submodule "CA"]
-	path = CA
-	url = /software/distr/wgs
+	url = https://github.com/mummer4/mummer.git
