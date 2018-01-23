@@ -8,7 +8,7 @@ Citation for MaSuRCA hybrid assembler: Zimin AV, Puiu D, Luo MC, Zhu T, Koren S,
 
 # 1. System requirements/run rimes
 
-# Compile/Install. 
+# Compile/Install requirements. 
 To compile the assembler we require gcc version 4.7 or newer to be installed on the system.
 Only Linux is supported (May or may not compile under gcc for MacOS or Cygwin, Windows, etc). The assembler has been tested on the following distributions:
 
@@ -50,7 +50,7 @@ The expected run times depend on the cpu speed/number of cores used for the asse
 
 # 2. Installation instructions
 
-To install, first download the latest distribution from ftp://ftp.genome.umd.edu/pub/MaSuRCA/. Then untar/unzip the package MaSuRCA-X.X.X.tgz, cd to the resulting folder and run './install.sh'.  The installation script will configure and make all necessary packages.
+To install, first download the latest distribution from ftp://ftp.genome.umd.edu/pub/MaSuRCA/ or from the github release page. Then untar/unzip the package MaSuRCA-X.X.X.tgz, cd to the resulting folder and run './install.sh'.  The installation script will configure and make all necessary packages.
 
 In the rest of this document, '/install_path' refers to a path to the directory in which './install.sh' was run.
 
@@ -64,7 +64,7 @@ git submodule update
 
 make
 
-When compiling the development tree (as opposed to compiling the distribution), there is dependency on yaggo (https://github.com/gmarcais/yaggo).  Yaggo must be available in the path.
+When compiling the development tree (as opposed to compiling the distribution), there are dependencies on swig and yaggo (http://www.swig.org/ and https://github.com/gmarcais/yaggo).  Both must be available on the path.
 
 # 3. Running the assembler
 
