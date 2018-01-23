@@ -227,4 +227,4 @@ For example
 •	if error correction failed then remove the files named '??.cor.fa' and then run $/install_path/ MaSuRCA-X.X.X/bin/masurca config.txt and execute 'assemble.sh'
 
 # Assembly result. 
-The final assembly files are under CA/10-gapclose and named 'genome.ctg.fasta' for the contig sequences and 'genome.scf.fasta' for the scaffold sequences. 
+The final assembly scaffolds file is under CA/ or CA.mr...../ and named final.genome.scf.fasta. 
