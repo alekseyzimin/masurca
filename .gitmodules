@@ -13,6 +13,9 @@
 [submodule "wgs-8"]
 	path = CA8
 	url = https://github.com/alekseyzimin/wgs-8.git
+[submodule "wgs"]
+        path = CA
+        url = https://github.com/alekseyzimin/wgs.git
 [submodule "SOAPdenovo2"]
 	path = SOAPdenovo2
 	url = https://github.com/alekseyzimin/SOAPdenovo2.git
