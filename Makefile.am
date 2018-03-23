@@ -5,7 +5,7 @@ EXTRA_DIST = LICENSE.txt
 
 install-special:
 	@echo $(SUBDIRS) | tr ' ' '\n' | grep -v '^CA' | while read subdir; do \
-	  echo "Making install in $$subdir pwd `pwd`"; \
+	  echo "Making install in $$subdir pwd `pwd -P`"; \
 	  $(MAKE) $(AM_MAKEFLAGS) -C $$subdir install; \
 	done
 	@echo $(SUBDIRS) | tr ' ' '\n' | grep '^CA' |while read subdir; do \
