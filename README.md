@@ -50,9 +50,9 @@ The expected run times depend on the cpu speed/number of cores used for the asse
 
 # 2. Installation instructions
 
-To install, first download the latest distribution from ftp://ftp.genome.umd.edu/pub/MaSuRCA/ or from the github release page. Then untar/unzip the package MaSuRCA-X.X.X.tgz, cd to the resulting folder and run './install.sh'.  The installation script will configure and make all necessary packages.
+To install, first download the latest distribution from ftp://ftp.genome.umd.edu/pub/MaSuRCA/ or from the github release page. Then untar/unzip the package MaSuRCA-X.X.X.tgz, cd to the resulting folder and run `./install.sh`.  The installation script will configure and make all necessary packages.
 
-In the rest of this document, '/install_path' refers to a path to the directory in which './install.sh' was run.
+In the rest of this document, `/install_path` refers to a path to the directory in which `./install.sh` was run.
 
 You can instead clone the development tree:
 
@@ -72,14 +72,14 @@ The general steps to run the MaSuRCA assemblers are as follows, and will be cove
 
 IMPORTANT! Do not use third party tools to pre-process the Illumina data before providing it to MaSuRCA, unless you are absolutely sure you know exactly what the preprocessing tool does.  Do not do any trimming, cleaning or error correction. This will likely deteriorate the assembly.
 
-First, create a configuration file which contains the location of the compiled assembler, the location of the data and some parameters. Copy in your assembly directory the template configuration file '/install_path/sr_config_example.txt' which was created by the installer with the correct paths to the freshly compiled software and with reasonable parameters. Many assembly projects should only need to set the path to the input data.
+First, create a configuration file which contains the location of the compiled assembler, the location of the data and some parameters. Copy in your assembly directory the template configuration file `/install_path/sr_config_example.txt` which was created by the installer with the correct paths to the freshly compiled software and with reasonable parameters. Many assembly projects should only need to set the path to the input data.
 
-Second, run the 'masurca' script which will generate from the configuration file a shell script 'assemble.sh'. This last script is the main driver of the assembly.
+Second, run the `masurca` script which will generate from the configuration file a shell script `assemble.sh`. This last script is the main driver of the assembly.
 
-Finally, run the script 'assemble.sh' to assemble the data.
+Finally, run the script `assemble.sh` to assemble the data.
 
 ## Configuration. 
-To run the assembler, one must first create a configuration file that specifies the location of the executables, data and assembly parameters for the assembler. The installation script will create a sample config file 'sr_config_example.txt'. Lines starting with a pound sign ('#') are comments and ignored. All options are explained in the sample configuration file that looks like this:
+To run the assembler, one must first create a configuration file that specifies the location of the executables, data and assembly parameters for the assembler. The installation script will create a sample config file `sr_config_example.txt`. Lines starting with a pound sign ('#') are comments and ignored. All options are explained in the sample configuration file that looks like this:
 
 example configuration file 
 
@@ -186,7 +186,7 @@ END
 
 The config file consists of two sections: DATA and PARAMETERS. Each section concludes with END statement. User should copy the sample config file to the directory of choice for running the assembly and then modify it according to the specifications of the assembly project. Here are brief descriptions of the sections.
 
-DATA – in this section the user must specify the types of data available for the assembly. Each line represent a library and must start with PE=, JUMP= or OTHER= for the 3 different type of input read library (Paired Ends, Jumping or other). There can be multiple lines starting with 'PE=' (or JUMP=), one line per library. PE and JUMP data must be in fastq format while the other data is in provided as a Celera Assembler frag format ('.frg'). Every PE or JUMP library is named by a unique two letter prefix. No two library can have the same prefix and a prefix should be made of two printable characters or number (no space or control characters), e.g. 'aa', 'ZZ', 'l5', or 'J2'.
+DATA – in this section the user must specify the types of data available for the assembly. Each line represent a library and must start with PE=, JUMP= or OTHER= for the 3 different type of input read library (Paired Ends, Jumping or other). There can be multiple lines starting with `PE=` (or JUMP=), one line per library. PE and JUMP data must be in fastq format while the other data is in provided as a Celera Assembler frag format (`.frg`). Every PE or JUMP library is named by a unique two letter prefix. No two library can have the same prefix and a prefix should be made of two printable characters or number (no space or control characters), e.g. `aa`, `ZZ`, `l5`, or `J2`.
 
  The following types of data are supported:
  
@@ -198,7 +198,7 @@ example:
 
 PE = aa 180 20 /data/fwd_reads.fastq /data/rev_reads.fastq
 
-The 'mean' and 'stdev' parameters are the library insert average length and standard deviation. If the standard deviation is not known, set it to approximately 15% of the mean.If the second (reverse) read set is not available, do not specify it and just specify the forward reads.
+The `mean` and `stdev` parameters are the library insert average length and standard deviation. If the standard deviation is not known, set it to approximately 15% of the mean.If the second (reverse) read set is not available, do not specify it and just specify the forward reads.
 
 •	Illumina jumping/DiTag/other circularization protocol-based library mate pair reads:
 
@@ -262,12 +262,12 @@ Starting with version 3.2.4 MaSuRCA supports execution of the mega-reads correct
 Long reads are corrected in batches. GRID_BATCH_SIZE is the batch size in bases of long reads.  You can figure out the number of batches by dividing the total amount of long read data by the GRID_BATCH_SIZE. Memory usage for each batch does not depend on this parameter, it scales with genome size instead. Since there is some overhead to starting each batch, I recommend setting this to have not more than 100 batches. The setting that is equal to 2-3 times the number of physical computers you have in the grid works best.  The total number of batches is limited to 1000.
 The Celera Assembler (or CABOG) will use the grid as well to run overlapper only.  Overlapper jobs are not memory-intensive and thus multiple jobs can be submitted to each node.  Each job will use up to 4 threads – the code is not efficient enough to use more than that number of threads effectively.  
 
-The masurca and the assemble.sh script. Once you’ve created a configuration file, use the ‘masurca' script from the MaSuRCA bin directory to generate the 'assemble.sh' shell script that executes the assembly:
+The masurca and the assemble.sh script. Once you’ve created a configuration file, use the `masurca` script from the MaSuRCA bin directory to generate the `assemble.sh` shell script that executes the assembly:
 
 $ /install_path/ MaSuRCA-X.X.X/bin/masurca config.txt
 
-To run the assembly, execute 'assemble.sh'. 
-Typically upon completion of the successful assembly, the current directory, where 'assemble.sh' was generated, will contain the following files, in reverse chronological order:
+To run the assembly, execute `assemble.sh`. 
+Typically upon completion of the successful assembly, the current directory, where `assemble.sh` was generated, will contain the following files, in reverse chronological order:
 
 $ ls –lth
 
@@ -350,11 +350,11 @@ assemble.sh	the original assemble.sh script
 # Restarting a failed assembly. 
 If something fails or goes wrong, or you noticed a mistake made in configuration, you can stop and re-start the assembly as follows.
 
-•	Terminate the assembly by Control-C or by killing the 'assemble.sh' process
+•	Terminate the assembly by Control-C or by killing the `assemble.sh` process
 
 •	Examine the assembly folder and delete all files that contain incorrect/failed contents (see table above for file designations).
 
-•	Run $/install_path/MaSuRCA-X.X.X/bin/masurca config.txt in the assembly directory.  This will create a new 'assemble.sh' script 
+•	Run $/install_path/MaSuRCA-X.X.X/bin/masurca config.txt in the assembly directory.  This will create a new `assemble.sh` script 
 accounting for the files that are already present and checking for all dependencies to only run the steps that need to be run
 
 •	Run ./assemble.sh
@@ -363,11 +363,11 @@ For example
 
 •	if you noticed that CABOG failed due to lack of disk space, then, after freeing some space, simply run 
 
-$/install_path/MaSuRCA-X.X.X/bin/masurca config.txt and execute  'assemble.sh'
+$/install_path/MaSuRCA-X.X.X/bin/masurca config.txt and execute  `assemble.sh`
 
-•	if you noticed that you omitted or misspecified one of the jumping library files, add the files to the DATA section of config.txt and run $/install_path/ MaSuRCA-X.X.X/bin/masurca config.txt and execute 'assemble.sh'
+•	if you noticed that you omitted or misspecified one of the jumping library files, add the files to the DATA section of config.txt and run $/install_path/ MaSuRCA-X.X.X/bin/masurca config.txt and execute `assemble.sh`
 
-•	if error correction failed then remove the files named '??.cor.fa' and then run $/install_path/ MaSuRCA-X.X.X/bin/masurca config.txt and execute 'assemble.sh'
+•	if error correction failed then remove the files named `??.cor.fa` and then run $/install_path/ MaSuRCA-X.X.X/bin/masurca config.txt and execute `assemble.sh`
 
 # Assembly result. 
 The final assembly scaffolds file is under CA/ or CA.mr...../ and named final.genome.scf.fasta. 
