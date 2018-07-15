@@ -8,7 +8,7 @@ Citation for MaSuRCA hybrid assembler: Zimin AV, Puiu D, Luo MC, Zhu T, Koren S,
 
 # 1. System requirements/run rimes
 
-# Compile/Install requirements. 
+## Compile/Install requirements. 
 To compile the assembler we require gcc version 4.7 or newer to be installed on the system.
 Only Linux is supported (May or may not compile under gcc for MacOS or Cygwin, Windows, etc). The assembler has been tested on the following distributions:
 
@@ -22,7 +22,7 @@ Only Linux is supported (May or may not compile under gcc for MacOS or Cygwin, W
 
 •	SUSE Linux 16 and up
 
-# Hardware requirements. 
+## Hardware requirements. 
 The hardware requirements vary with the size of the genome project.  Both Intel and AMD x64 architectures are supported. The general guidelines for hardware configuration are as follows:
 
 •	Bacteria (up to 10Mb): 16Gb RAM, 8+ cores, 10Gb disk space
@@ -35,7 +35,7 @@ The hardware requirements vary with the size of the genome project.  Both Intel 
 
 •	Plant genomes (up to 30Gb): 1Tb RAM, 64+cores, 10Tb+ disk space
 
-# Expected run times. 
+## Expected run times. 
 The expected run times depend on the cpu speed/number of cores used for the assembly and on the data used. The following lists the expected run times for the minimum configurations outlined above for Illumina-only data sets. Adding long reads (454, Sanger, etc. makes the assembly run about 50-100% longer:
 
 •	Bacteria (up to 10Mb): <1 hour
@@ -68,7 +68,7 @@ When compiling the development tree (as opposed to compiling the distribution), 
 
 # 3. Running the assembler
 
-#Overview. 
+## Overview. 
 The general steps to run the MaSuRCA assemblers are as follows, and will be covered in details in later sections. It is advised to create a new directory for each assembly project.
 
 IMPORTANT! Do not use third party tools top pre-process the Illumina data before providing it to MaSuRCA, unless you are absolutely sure you know exactly what the preprocessing tool does.  Do not do any trimming, cleaning or error correction. This will likely deteriorate the assembly.
@@ -79,7 +79,7 @@ Second, run the 'masurca' script which will generate from the configuration file
 
 Finally, run the script 'assemble.sh' to assemble the data.
 
-# Configuration. 
+## Configuration. 
 To run the assembler, one must first create a configuration file that specifies the location of the executables, data and assembly parameters for the assembler. The installation script will create a sample config file 'sr_config_example.txt'. Lines starting with a pound sign ('#') are comments and ignored. All options are explained in the sample configuration file that looks like this:
 
 example configuration file 
