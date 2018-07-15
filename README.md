@@ -56,13 +56,12 @@ In the rest of this document, '/install_path' refers to a path to the directory 
 
 You can instead clone the development tree:
 
+```
 git clone https://github.com/alekseyzimin/masurca
-
 git submodule init
-
 git submodule update
-
 make
+```
 
 When compiling the development tree (as opposed to compiling the distribution), there are dependencies on swig and yaggo (http://www.swig.org/ and https://github.com/gmarcais/yaggo).  Both must be available on the path.
 
