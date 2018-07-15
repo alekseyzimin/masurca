@@ -192,67 +192,67 @@ DATA – in this section the user must specify the types of data available for t
  
 •	Illumina paired end (or single end) reads -- MANDATORY:
 
-PE = two_letter_prefix mean stdev /PATH/fwd_reads.fastq /PATH/rev_reads.fastq
+`PE = two_letter_prefix mean stdev /PATH/fwd_reads.fastq /PATH/rev_reads.fastq`
 
 example:
 
-PE = aa 180 20 /data/fwd_reads.fastq /data/rev_reads.fastq
+`PE = aa 180 20 /data/fwd_reads.fastq /data/rev_reads.fastq`
 
 The `mean` and `stdev` parameters are the library insert average length and standard deviation. If the standard deviation is not known, set it to approximately 15% of the mean.If the second (reverse) read set is not available, do not specify it and just specify the forward reads.
 
 •	Illumina jumping/DiTag/other circularization protocol-based library mate pair reads:
 
-JUMP = two_letter_prefix mean stdev /PATH/fwd_reads.fastq /PATH/rev_reads.fastq
+`JUMP = two_letter_prefix mean stdev /PATH/fwd_reads.fastq /PATH/rev_reads.fastq`
 
 example:
 
-JUMP = cc 3500 500 /data/jump_fwd_reads.fastq /data/jump_rev_reads.fastq
+`JUMP = cc 3500 500 /data/jump_fwd_reads.fastq /data/jump_rev_reads.fastq`
 
 By default, the assembler assumes that the jumping library pairs are “outties” (<--   -->). Some protocols (DiTag) use double-circularization which results in “innie” pairs (-->   <--).  In this case please specify negative mean.
 
 •	Other types of data (454, Sanger, etc) must be converted to CABOG format FRG files (see CABOG documentation at http://sourceforge.net/apps/mediawiki/wgs-assembler/index.php?title=Main_Page ):
 
-OTHER = data.frg
+`OTHER = data.frg`
 
 •	PacBio/MinION data are supported.  Note that you have to have 50x + coverage in Illumina Paired End reads to use PacBio of Oxford Nanopore MinION data.  Supply PacBio or MinION reads (cannot use both at the same time) in a single fasta file as:
 
-o	PACBIO=file.fa or NANOPORE=file.fa
+`PACBIO=file.fa` or `NANOPORE=file.fa`
 
 More than one entry for each data type/set of files is allowed EXCEPT for PacBio/Nanopore data.  That is if you have several pairs of PE fastq files, specify each pair on a separate line with a different two-letter prefix.
 
 PARAMETERS. The following parameters are mandatory:
 
-•	NUM_THREADS=16
+`NUM_THREADS=16`
 
 set it to the number of cores in the computer to be used for assembly
 
-•	JF_SIZE=2000000000
+`JF_SIZE=2000000000`
 
 jellyfish hash size, set this to about 10x the genome size.
 
-•	GRID_QUEUE=all.q 
+`GRID_QUEUE=all.q`
 
 mandatory if USE_GRID set to 1. Name of the SGE queue to use.  NOTE that number of slots must be set to 1 for each physical computer
 
 Optional parameters:
 
-•	USE_LINKING_MATES=1
+`USE_LINKING_MATES=1`
 
-most of the paired end reads end up in the same super read and thus are not passed to the assembler.  Those that do not end up in the same super read are called ”linking mates” . The best assembly results are achieved by setting this parameter to 1 for Illumina-only assemblies.  If you have more than 2x coverage by long (454, Sanger, etc) reads, set this to 0. 
+Most of the paired end reads end up in the same super read and thus are not passed to the assembler.  Those that do not end up in the same super read are called ”linking mates” . The best assembly results are achieved by setting this parameter to 1 for Illumina-only assemblies.  If you have more than 2x coverage by long (454, Sanger, etc) reads, set this to 0. 
 
-•	GRAPH_KMER_SIZE=auto
+`GRAPH_KMER_SIZE=auto`
 
 this is the kmer size to be used for super reads.  “auto” is the safest choice. Only advanced users should modify this parameter.
 
-•	LIMIT_JUMP_COVERAGE = 60
+`LIMIT_JUMP_COVERAGE = 60`
 
 in some cases (especially for bacterial assemblies) the jumping library has too much coverage which confuses the assembler.  By setting this parameter you can have assembler down-sample the jumping library to 60x (from above) coverage.  For bigger eukaryotic genomes you can set this parameter to 300.
 
-•	CA_PARAMETERS = cgwErrorRate=0.25 
+`CA_PARAMETERS = cgwErrorRate=0.25`
 
 these are the additional parameters to Celera Assembler, and they should only be supplied/modified by advanced users.  “ovlMerSize=30 cgwErrorRate=0.25 ovlMemory=4GB” should be used for bacterial assemblies; “ovlMerSize=30 cgwErrorRate=0.15 ovlMemory=4GB” should be used for all other genomes
 
-•	SOAP_ASSEMBLY = 0
+`SOAP_ASSEMBLY = 0`
 
 Set this to 1 if you would like to perform contigging and scaffolding done by SOAPdenovo2 instead of CABOG.  This will decrease assembly runtime, but will likely result in inferior assembly.  This option is useful when assembling very large genomes (5Gbp+), as CABOG may take months to rung on these.
 
@@ -264,88 +264,88 @@ The Celera Assembler (or CABOG) will use the grid as well to run overlapper only
 
 The masurca and the assemble.sh script. Once you’ve created a configuration file, use the `masurca` script from the MaSuRCA bin directory to generate the `assemble.sh` shell script that executes the assembly:
 
-$ /install_path/ MaSuRCA-X.X.X/bin/masurca config.txt
+`$ /install_path/ MaSuRCA-X.X.X/bin/masurca config.txt`
 
 To run the assembly, execute `assemble.sh`. 
 Typically upon completion of the successful assembly, the current directory, where `assemble.sh` was generated, will contain the following files, in reverse chronological order:
 
-$ ls –lth
+`$ ls –lth`
 
 FILE	CONTAINS
 
-gapClose.err	STDOUT/STDERR for gap filling
+`gapClose.err`	STDOUT/STDERR for gap filling
 
 CA	CABOG folder – the final assembly ends up in CA/9-terminator  or CA/10-gapclose (if gapClose succeeded, most of the time)
 
-runCA2.out	CABOG stdout for scaffolder
+`runCA2.out`	CABOG stdout for scaffolder
 
-tigStore.err	Stderr for tigStore
+`tigStore.err`	Stderr for tigStore
 
-unitig_cov.txt	CABOG coverage statistics
+`unitig_cov.txt`	CABOG coverage statistics
 
-global_arrival_rate.txt	CABOG coverage statistics, global arrival rate
+`global_arrival_rate.txt`	CABOG coverage statistics, global arrival rate
 
-unitig_layout.txt	Unitig layout/sequences used to recomputed the coverage statistics
+`unitig_layout.txt`	Unitig layout/sequences used to recomputed the coverage statistics
 
-genome.uid	File relating UID to read name for CABOG
+`genome.uid`	File relating UID to read name for CABOG
 
-runCA1.out	CABOG stdout for unitig consensus
+`runCA1.out`	CABOG stdout for unitig consensus
 
-runCA0.out	CABOG stdout for initial stages: store building, overlapping, unitigging
+`runCA0.out`	CABOG stdout for initial stages: store building, overlapping, unitigging
 
-superReadSequences_shr.frg	FRG file for super reads, super reads >2047br are shredded with an overlap of 1500bp
+`superReadSequences_shr.frg`	FRG file for super reads, super reads >2047br are shredded with an overlap of 1500bp
 
-pe.linking.frg	FRG file of PE pairs where the two reads ended up in different super reads
+`pe.linking.frg`	FRG file of PE pairs where the two reads ended up in different super reads
 
-pe.linking.fa	Fasta file of PE pairs where the two reads ended up in different super reads
+`pe.linking.fa`	Fasta file of PE pairs where the two reads ended up in different super reads
 
-work1	Working directory of the super reads code that generates the super reads from PE reads
+`work1/`	Working directory of the super reads code that generates the super reads from PE reads
 
-super1.err	STDERR output of the super reads code that generates the super reads from PE reads
+`super1.err`	STDERR output of the super reads code that generates the super reads from PE reads
 
-sj.cor.clean.frg	CABOG FRG file with corrected jumping library pairs, redundant and non-junction removed, coverage limited
+`sj.cor.clean.frg`	CABOG FRG file with corrected jumping library pairs, redundant and non-junction removed, coverage limited
 
-sj.cor.ext.reduced.fa	Fasta file with corrected jumping library pairs, redundant and non-junction removed, coverage limited
+`sj.cor.ext.reduced.fa`	Fasta file with corrected jumping library pairs, redundant and non-junction removed, coverage limited
 
-mates_to_break.txt	File that lists the jumping library mates that are to be removed, if the jumping library clone coverage exceeds the LIMIT_JUMP_COVERAGE parameter 
+`mates_to_break.txt`	File that lists the jumping library mates that are to be removed, if the jumping library clone coverage exceeds the LIMIT_JUMP_COVERAGE parameter 
 
-compute_jump_coverage.txt	Supplementary file used to compute clone coverage of the jumping library, post-filtering
+`compute_jump_coverage.txt`	Supplementary file used to compute clone coverage of the jumping library, post-filtering
 
-sj.cor.clean.fa	Fasta file with corrected jumping library pairs, redundant and non-junction removed 
+`sj.cor.clean.fa`	Fasta file with corrected jumping library pairs, redundant and non-junction removed
 
-redundant_sj.txt	Text file with names of the redundant jumping library mate pairs
+`redundant_sj.txt`	Text file with names of the redundant jumping library mate pairs
 
-chimeric_sj.txt	text file with names of the non-junction jumping library mate pairs
+`chimeric_sj.txt`	text file with names of the non-junction jumping library mate pairs
 
-work2	working directory for the super reads code used to filter the JUMP libraries for non-junction/redundant pairs
+`work2/`	working directory for the super reads code used to filter the JUMP libraries for non-junction/redundant pairs
 
-work2.1	working directory for secondary jumping filter based on the variable k-mer size
+`work2.1/`	working directory for secondary jumping filter based on the variable k-mer size
 
-super2.err	STDERR output of the super reads code used to filter the JUMP libraries for non-junction/redundant pairs
+`super2.err`	STDERR output of the super reads code used to filter the JUMP libraries for non-junction/redundant pairs
 
-guillaumeKUnitigsAtLeast32bases_all.fasta	fasta file for k-unitigs (see the paper referred above)
+`guillaumeKUnitigsAtLeast32bases_all.fasta`	fasta file for k-unitigs (see the paper referred above)
 
 k_u_0	jellyfish hash created from all error corrected reads, and used to estimate the genome size
 
-??.cor.fa	error corrected JUMP reads, one such file for each library with '??' being the prefix.  The ordering of the reads is arbitrary, but the pairs are guaranteed to appear together. No quality scores.
+`??.cor.fa`	error corrected JUMP reads, one such file for each library with '??' being the prefix.  The ordering of the reads is arbitrary, but the pairs are guaranteed to appear together. No quality scores.
 
-error_correct.log	log file for error correction
+`error_correct.log`	log file for error correction
 
-pe.cor.fa	error corrected PE reads.  The ordering of the reads is arbitrary, but the pairs are guaranteed to appear together. No quality scores
+`pe.cor.fa`	error corrected PE reads.  The ordering of the reads is arbitrary, but the pairs are guaranteed to appear together. No quality scores
 
 combined_0	special combined Jellyfish hash for error correction
 
-pe_data.tmp	supplementary information to figure out the GC content and lengths of PE reads
+`pe_data.tmp`	supplementary information to figure out the GC content and lengths of PE reads
 
-sj.renamed.fastq	the ??.renamed.fastq file is created for each “JUMP= …” entry in the configuration file. These file(s) contain renamed reads in the fastq format
+`sj.renamed.fastq`	the ??.renamed.fastq file is created for each “JUMP= …” entry in the configuration file. These file(s) contain renamed reads in the fastq format
 
-meanAndStdevByPrefix.sj.txt 	auto-generated file of “fake” mean and stdev for non-junction jumping library pairs.  The Illumina protocol states that these are about 200-700bp long
+`meanAndStdevByPrefix.sj.txt` auto-generated file of “fake” mean and stdev for non-junction jumping library pairs.  The Illumina protocol states that these are about 200-700bp long
 
-pe.renamed.fastq	the ??.renamed.fastq file is created for each “PE= …” entry in the configuration file. These file(s) contain renamed reads in the fastq format.
+`pe.renamed.fastq`	the `??.renamed.fastq file` is created for each “PE= …” entry in the configuration file. These file(s) contain renamed reads in the fastq format.
 
-meanAndStdevByPrefix.pe.txt	auto-generated file of means and stdevs for PE reads
+`meanAndStdevByPrefix.pe.txt`	auto-generated file of means and stdevs for PE reads
 
-assemble.sh	the original assemble.sh script
+`assemble.sh`	the original assemble.sh script
 
 # Restarting a failed assembly. 
 If something fails or goes wrong, or you noticed a mistake made in configuration, you can stop and re-start the assembly as follows.
