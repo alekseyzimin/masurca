@@ -82,7 +82,7 @@ Finally, run the script `assemble.sh` to assemble the data.
 To run the assembler, one must first create a configuration file that specifies the location of the executables, data and assembly parameters for the assembler. The installation script will create a sample config file `sr_config_example.txt`. Lines starting with a pound sign ('#') are comments and ignored. All options are explained in the sample configuration file that looks like this:
 
 example configuration file 
-
+```
 \# DATA is specified as type {PE,JUMP,OTHER,PACBIO} and 5 fields:
 
 \# 1)two_letter_prefix 2)mean 3)stdev 4)fastq(.gz)_fwd_reads
@@ -182,7 +182,7 @@ JF_SIZE = 200000000
 SOAP_ASSEMBLY=0
 
 END
-
+```
 
 The config file consists of two sections: DATA and PARAMETERS. Each section concludes with END statement. User should copy the sample config file to the directory of choice for running the assembly and then modify it according to the specifications of the assembly project. Here are brief descriptions of the sections.
 
