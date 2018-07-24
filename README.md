@@ -83,25 +83,25 @@ To run the assembler, one must first create a configuration file that specifies 
 
 example configuration file 
 ```
-\# DATA is specified as type {PE,JUMP,OTHER,PACBIO} and 5 fields:
+# DATA is specified as type {PE,JUMP,OTHER,PACBIO} and 5 fields:
 
-\# 1)two_letter_prefix 2)mean 3)stdev 4)fastq(.gz)_fwd_reads
+# 1)two_letter_prefix 2)mean 3)stdev 4)fastq(.gz)_fwd_reads
 
-\# 5)fastq(.gz)_rev_reads. The PE reads are always assumed to be
+# 5)fastq(.gz)_rev_reads. The PE reads are always assumed to be
 
-\# innies, i.e. --->.<---, and JUMP are assumed to be outties
+# innies, i.e. --->.<---, and JUMP are assumed to be outties
 
-\# <---.--->. If there are any jump libraries that are innies, such as
+# <---.--->. If there are any jump libraries that are innies, such as
 
-\# longjump, specify them as JUMP and specify NEGATIVE mean. Reverse reads
+# longjump, specify them as JUMP and specify NEGATIVE mean. Reverse reads
 
-\# are optional for PE libraries and mandatory for JUMP libraries. Any
+# are optional for PE libraries and mandatory for JUMP libraries. Any
 
-\# OTHER sequence data (454, Sanger, Ion torrent, etc) must be first
+# OTHER sequence data (454, Sanger, Ion torrent, etc) must be first
 
-\# converted into Celera Assembler compatible .frg files (see
+# converted into Celera Assembler compatible .frg files (see
 
-\# http://wgs-assembler.sourceforge.com)
+# http://wgs-assembler.sourceforge.com)
 
 DATA
 
@@ -109,7 +109,7 @@ PE= pe 180 20  /FULL_PATH/frag_1.fastq  /FULL_PATH/frag_2.fastq
 
 JUMP= sh 3600 200  /FULL_PATH/short_1.fastq  /FULL_PATH/short_2.fastq
 
-\#pacbio reads must be in a single fasta file! make sure you provide absolute path
+#pacbio reads must be in a single fasta file! make sure you provide absolute path
 
 PACBIO=/FULL_PATH/pacbio.fa
 
@@ -119,65 +119,65 @@ END
 
 PARAMETERS
 
-\#set this to 1 if your Illumina jumping library reads are shorter than 100bp
+#set this to 1 if your Illumina jumping library reads are shorter than 100bp
 
 EXTEND_JUMP_READS=0
 
-\#this is k-mer size for deBruijn graph values between 25 and 127 are supported, auto will compute the optimal size based on the read data and GC content
+#this is k-mer size for deBruijn graph values between 25 and 127 are supported, auto will compute the optimal size based on the read data and GC content
 
 GRAPH_KMER_SIZE = auto
 
-\#set this to 1 for all Illumina-only assemblies
+#set this to 1 for all Illumina-only assemblies
 
-\#set this to 1 if you have less than 20x long reads (454, Sanger, Pacbio) and less than 50x CLONE coverage by Illumina, Sanger or 454 mate pairs
+#set this to 1 if you have less than 20x long reads (454, Sanger, Pacbio) or less than 50x CLONE coverage by Illumina, Sanger or 454 mate pairs
 
-\#otherwise keep at 0
+#otherwise keep at 0
 
 USE_LINKING_MATES = 0
 
-\#specifies whether to run mega-reads correction on the grid
+#specifies whether to run mega-reads correction on the grid
 
 USE_GRID=0
 
-\#specifies queue to use when running on the grid MANDATORY
+#specifies queue to use when running on the grid MANDATORY
 
 GRID_QUEUE=all.q
 
-\#batch size in the amount of long read sequence for each batch on the grid
+#batch size in the amount of long read sequence for each batch on the grid
 
 GRID_BATCH_SIZE=300000000
 
-\#coverage by the longest Long reads to use
+#coverage by the longest Long reads to use
 
 LHE_COVERAGE=30
 
-\#this parameter is useful if you have too many Illumina jumping library mates. Typically set it to 60 for bacteria and 300 for the other organisms 
+#this parameter is useful if you have too many Illumina jumping library mates. Typically set it to 60 for bacteria and 300 for the other organisms 
 
 LIMIT_JUMP_COVERAGE = 300
 
-\#these are the additional parameters to Celera Assembler.  do not worry about performance, number or processors or batch sizes -- these are computed automatically. 
+#these are the additional parameters to Celera Assembler.  do not worry about performance, number or processors or batch sizes -- these are computed automatically. 
 
-\#set cgwErrorRate=0.25 for bacteria and 0.1<=cgwErrorRate<=0.15 for other organisms.
+#set cgwErrorRate=0.25 for bacteria and 0.1<=cgwErrorRate<=0.15 for other organisms.
 
 CA_PARAMETERS =  cgwErrorRate=0.15 
 
-\#minimum count k-mers used in error correction 1 means all k-mers are used.  one can increase to 2 if Illumina coverage >100
+#minimum count k-mers used in error correction 1 means all k-mers are used.  one can increase to 2 if Illumina coverage >100
 
 KMER_COUNT_THRESHOLD = 1
 
-\#whether to attempt to close gaps in scaffolds with Illumina data
+#whether to attempt to close gaps in scaffolds with Illumina data
 
 CLOSE_GAPS=1
 
-\#auto-detected number of cpus to use
+#auto-detected number of cpus to use
 
 NUM_THREADS = 16
 
-\#this is mandatory jellyfish hash size -- a safe value is estimated_genome_size*estimated_coverage
+#this is mandatory jellyfish hash size -- a safe value is estimated_genome_size*estimated_coverage
 
 JF_SIZE = 200000000
 
-\#set this to 1 to use SOAPdenovo contigging/scaffolding module.  Assembly will be worse but will run faster. Useful for very large (>5Gbp) genomes from Illumina-only data
+#set this to 1 to use SOAPdenovo contigging/scaffolding module.  Assembly will be worse but will run faster. Useful for very large (>5Gbp) genomes from Illumina-only data
 
 SOAP_ASSEMBLY=0
 
