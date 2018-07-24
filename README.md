@@ -129,7 +129,7 @@ GRAPH_KMER_SIZE = auto
 
 #set this to 1 for all Illumina-only assemblies
 
-#set this to 1 if you have less than 20x long reads (454, Sanger, Pacbio) or less than 50x CLONE coverage by Illumina, Sanger or 454 mate pairs
+#set this to 1 if you have less than 20x long reads (454, Sanger, Pacbio) for hybrid assemblies OR less than 50x CLONE coverage by Illumina, Sanger or 454 mate pairs for assemblies without long reads
 
 #otherwise keep at 0
 
