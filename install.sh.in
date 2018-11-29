@@ -2,7 +2,7 @@
 
 set -xe
 
-ROOT=`pwd`
+ROOT=`pwd -P`
 [ -z "$DEST" ] && DEST="$ROOT"
 
 ###################
