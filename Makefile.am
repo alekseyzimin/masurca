@@ -1,4 +1,4 @@
-SUBDIRS = jellyfish samtools prepare ufasta quorum SuperReads SOAPdenovo2 PacBio MUMmer CA8 CA
+SUBDIRS = jellyfish samtools prepare ufasta quorum SuperReads SOAPdenovo2 PacBio MUMmer CA8 
 ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = LICENSE.txt
