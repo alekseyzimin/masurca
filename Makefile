@@ -37,7 +37,7 @@ $(BUILDDIR)/global: ./configure
 configure: configure.ac
 	autoreconf -fi
 
-SHORTCUTS =  CA8 jellyfish PacBio prepare ufasta quorum SuperReads SOAPdenovo2 MUMmer
+SHORTCUTS =  Flye CA8 jellyfish PacBio prepare ufasta quorum SuperReads SOAPdenovo2 MUMmer
 .PHONY: $(SHORTCUTS)
 $(SHORTCUTS):
 	$(MAKE) -C build/global/$@ install INSTALL="$(UPD_INSTALL)"
@@ -82,7 +82,7 @@ $(DISTDIST)/$1:
 	(tar c $1) | (cd $(DISTDIST); tar -x)
 endef
 
-# $(foreach d,CA8 SOAPdenovo2,$(eval $(call GIT_TAR,$d)))
+$(foreach d,Flye,$(eval $(call GIT_TAR,$d)))
 
 $(DISTDIST)/install.sh: install.sh.in
 	install $< $@

@@ -31,3 +31,9 @@
 [submodule "mummer4"]
 	path = MUMmer
 	url = https://github.com/mummer4/mummer.git
+[submodule "flye"]
+        path = Flye
+        url = https://github.com/alekseyzimin/flye.git
+[submodule "Flye"]
+	path = Flye
+	url = ./Flye
