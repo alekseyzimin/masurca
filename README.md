@@ -50,11 +50,9 @@ The expected run times depend on the cpu speed/number of cores used for the asse
 
 # 2. Installation instructions
 
-To install, first download the latest distribution from ftp://ftp.genome.umd.edu/pub/MaSuRCA/ or from the github release page. Then untar/unzip the package MaSuRCA-X.X.X.tgz, cd to the resulting folder and run `./install.sh`.  The installation script will configure and make all necessary packages.
+To install, first download the latest distribution from the github release page https://github.com/alekseyzimin/masurca/releases.Then untar/unzip the package MaSuRCA-X.X.X.tgz, cd to the resulting folder and run `./install.sh`.  The installation script will configure and make all necessary packages.
 
-In the rest of this document, `/install_path` refers to a path to the directory in which `./install.sh` was run.
-
-You can instead clone the development tree:
+Only for developers:  you can clone the development tree, but then there are dependencies such as swig and yaggo (http://www.swig.org/ and https://github.com/gmarcais/yaggo) that must be available on the PATH:
 
 ```
 git clone https://github.com/alekseyzimin/masurca
@@ -63,12 +61,12 @@ git submodule update
 make
 ```
 
-When compiling the development tree (as opposed to compiling the distribution), there are dependencies on swig and yaggo (http://www.swig.org/ and https://github.com/gmarcais/yaggo).  Both must be available on the path.
-
 # 3. Running the assembler
 
 ## Overview. 
 The general steps to run the MaSuRCA assemblers are as follows, and will be covered in details in later sections. It is advised to create a new directory for each assembly project.
+
+In the rest of this document, `/install_path` refers to a path to the directory in which `./install.sh` was run.
 
 IMPORTANT! Do not use third party tools to pre-process the Illumina data before providing it to MaSuRCA, unless you are absolutely sure you know exactly what the preprocessing tool does.  Do not do any trimming, cleaning or error correction. This will likely deteriorate the assembly.
 
@@ -248,7 +246,7 @@ this is the kmer size to be used for super reads.  “auto” is the safest choi
 
 in some cases (especially for bacterial assemblies) the jumping library has too much coverage which confuses the assembler.  By setting this parameter you can have assembler down-sample the jumping library to 60x (from above) coverage.  For bigger eukaryotic genomes you can set this parameter to 300.
 
-`CA_PARAMETERS = cgwErrorRate=0.25`
+`CA_PARAMETERS = cgwErrorRate=0.1
 
 these are the additional parameters to Celera Assembler, and they should only be supplied/modified by advanced users.  “ovlMerSize=30 cgwErrorRate=0.25 ovlMemory=4GB” should be used for bacterial assemblies; “ovlMerSize=30 cgwErrorRate=0.15 ovlMemory=4GB” should be used for all other genomes
 
@@ -256,13 +254,18 @@ these are the additional parameters to Celera Assembler, and they should only be
 
 Set this to 1 if you would like to perform contigging and scaffolding done by SOAPdenovo2 instead of CABOG.  This will decrease assembly runtime, but will likely result in inferior assembly.  This option is useful when assembling very large genomes (5Gbp+), as CABOG may take months to rung on these.
 
-# Running mega-reads on the grid. 
-Starting with version 3.2.4 MaSuRCA supports execution of the mega-reads correction of the long high error reads such as PacBio or Nanopore reads on SGE grid.  SLURM support is coming in the next release.  To run on the grid, you must set USE_GRID=1 and specify the SGE queue to use (MANDATORY) using GRID_QUEUE=<name>.  Please create a special queue on the SGE grid for this operation.  The queue MUST have ONLY 1 SLOT PER PHYSICAL COMPUTER. Each batch will use NUM_THREADS threads on each computer, thus the number of slots in the SGE queue should be set to 1 for each physical computer.
+# Running MaSuRCA hybrid assembly on the grid. 
+Starting with version 3.2.4 MaSuRCA supports execution of the mega-reads correction of the long high error reads such as PacBio or Nanopore reads on SGE grid.  SLURM support is implemented in 3.3.1 and later releases.  To run MaSuRCA on the grid, you must set USE_GRID=1 and specify the SGE queue to use (MANDATORY) using GRID_QUEUE=<name>.  Please create a special queue on the SGE grid for this operation.  The queue MUST have ONLY 1 SLOT PER PHYSICAL COMPUTER. Each batch will use NUM_THREADS threads on each computer, thus the number of slots in the SGE queue should be set to 1 for each physical computer.
 
 Long reads are corrected in batches. GRID_BATCH_SIZE is the batch size in bases of long reads.  You can figure out the number of batches by dividing the total amount of long read data by the GRID_BATCH_SIZE. Memory usage for each batch does not depend on this parameter, it scales with genome size instead. Since there is some overhead to starting each batch, I recommend setting this to have not more than 100 batches. The setting that is equal to 2-3 times the number of physical computers you have in the grid works best.  The total number of batches is limited to 1000.
 The Celera Assembler (or CABOG) will use the grid as well to run overlapper only.  Overlapper jobs are not memory-intensive and thus multiple jobs can be submitted to each node.  Each job will use up to 4 threads – the code is not efficient enough to use more than that number of threads effectively.  
 
-The masurca and the assemble.sh script. Once you’ve created a configuration file, use the `masurca` script from the MaSuRCA bin directory to generate the `assemble.sh` shell script that executes the assembly:
+# If you only need to output corrected PacBio or Nanopore reads or super-reads. 
+You can abort the assemble.sh script after it reports "Running assembly" if you only need corrected reads or super-reads.  
+The super reads file is work1/superreadSequences.fasta.  The PacBio corrected reads are in mr.41.15.17.0.029.1.fa.  The Nanopore corrected reads are in mr.41.15.15.0.02.1.fa.  The PacBio/Nanopore corrected read names correspond to the original read names.
+
+# The masurca and the assemble.sh scripts. 
+Once you’ve created a configuration file, use the `masurca` script from the MaSuRCA bin directory to generate the `assemble.sh` shell script that executes the assembly:
 
 `$ /install_path/ MaSuRCA-X.X.X/bin/masurca config.txt`
 
