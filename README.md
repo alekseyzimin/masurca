@@ -261,8 +261,8 @@ Long reads are corrected in batches. GRID_BATCH_SIZE is the batch size in bases 
 The Celera Assembler (or CABOG) will use the grid as well to run overlapper only.  Overlapper jobs are not memory-intensive and thus multiple jobs can be submitted to each node.  Each job will use up to 4 threads – the code is not efficient enough to use more than that number of threads effectively.  
 
 # If you only need to output corrected PacBio or Nanopore reads or super-reads. 
-You can abort the assemble.sh script after it reports "Running assembly" if you only need corrected reads or super-reads.  
-The super reads file is work1/superreadSequences.fasta.  The PacBio corrected reads are in mr.41.15.17.0.029.1.fa.  The Nanopore corrected reads are in mr.41.15.15.0.02.1.fa.  The PacBio/Nanopore corrected read names correspond to the original read names.
+You can abort the assemble.sh script after it reports "Running assembly" if you only need corrected reads or super-reads output.  
+The super reads file is work1/superReadSequences.fasta.  The PacBio corrected reads are in mr.41.15.17.0.029.1.fa.  The Nanopore corrected reads are in mr.41.15.15.0.02.1.fa.  The PacBio/Nanopore corrected read names correspond to the original read names.
 
 # The masurca and the assemble.sh scripts. 
 Once you’ve created a configuration file, use the `masurca` script from the MaSuRCA bin directory to generate the `assemble.sh` shell script that executes the assembly:
