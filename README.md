@@ -77,113 +77,78 @@ Second, run the `masurca` script which will generate from the configuration file
 Finally, run the script `assemble.sh` to assemble the data.
 
 ## Configuration. 
-To run the assembler, one must first create a configuration file that specifies the location of the executables, data and assembly parameters for the assembler. The installation script will create a sample config file `sr_config_example.txt`. Lines starting with a pound sign ('#') are comments and ignored. All options are explained in the sample configuration file that looks like this:
+To run the assembler, one must first create a configuration file that specifies the location of the executables, data and assembly parameters for the assembler. The installation script will create a sample configuration file `sr_config_example.txt`. Lines starting with a pound sign ('#') are comments and ignored. The configuration file consists of two sections: DATA and PARAMETERS. Each section concludes with END statement. The easiest way is to copy the sample configuration file to the directory of choice for running the assembly and then modify it according to the specifications of the assembly project. 
 
-example configuration file 
+Please read all comments in the example configuration file before using MaSuRCA. All options are explained in the comments.  Here is the example configuration file:
 ```
+# example configuration file 
+
 # DATA is specified as type {PE,JUMP,OTHER,PACBIO} and 5 fields:
-
 # 1)two_letter_prefix 2)mean 3)stdev 4)fastq(.gz)_fwd_reads
-
 # 5)fastq(.gz)_rev_reads. The PE reads are always assumed to be
-
 # innies, i.e. --->.<---, and JUMP are assumed to be outties
-
 # <---.--->. If there are any jump libraries that are innies, such as
-
 # longjump, specify them as JUMP and specify NEGATIVE mean. Reverse reads
-
 # are optional for PE libraries and mandatory for JUMP libraries. Any
-
 # OTHER sequence data (454, Sanger, Ion torrent, etc) must be first
-
 # converted into Celera Assembler compatible .frg files (see
-
 # http://wgs-assembler.sourceforge.com)
-
 DATA
-
-PE= pe 180 20  /FULL_PATH/frag_1.fastq  /FULL_PATH/frag_2.fastq
-
+#Illumina paired end reads supplied as <two-character prefix> <fragment mean> <fragment stdev> <forward_reads> <reverse_reads>
+#if single-end, do not specify <reverse_reads>
+#MUST HAVE Illumina paired end reads to use MaSuRCA
+PE= pe 500 50  /FULL_PATH/frag_1.fastq  /FULL_PATH/frag_2.fastq
+#Illumina mate pair reads supplied as <two-character prefix> <fragment mean> <fragment stdev> <forward_reads> <reverse_reads>
 JUMP= sh 3600 200  /FULL_PATH/short_1.fastq  /FULL_PATH/short_2.fastq
-
-#pacbio reads must be in a single fasta file! make sure you provide absolute path
-
-PACBIO=/FULL_PATH/pacbio.fa
-
-OTHER=/FULL_PATH/file.frg
-
+#pacbio OR nanopore reads must be in a single fasta or fastq file with absolute path, can be gzipped
+#if you have both types of reads supply them both as NANOPORE type
+#PACBIO=/FULL_PATH/pacbio.fa
+#NANOPORE=/FULL_PATH/nanopore.fa
+#Other reads (Sanger, 454, etc) one frg file, concatenate your frg files into one if you have many
+#OTHER=/FULL_PATH/file.frg
+#synteny-assisted assembly, concatenate all reference genomes into one reference.fa; works for Illumina-only data
+#REFERENCE=/FULL_PATH/nanopore.fa
 END
 
 PARAMETERS
-
+#PLEASE READ all comments to essential parameters below, and set the parameters according to your project
 #set this to 1 if your Illumina jumping library reads are shorter than 100bp
-
 EXTEND_JUMP_READS=0
-
 #this is k-mer size for deBruijn graph values between 25 and 127 are supported, auto will compute the optimal size based on the read data and GC content
-
 GRAPH_KMER_SIZE = auto
-
 #set this to 1 for all Illumina-only assemblies
-
-#set this to 1 if you have less than 20x long reads (454, Sanger, Pacbio) for hybrid assemblies OR less than 50x CLONE coverage by Illumina, Sanger or 454 mate pairs for assemblies without long reads
-
-#otherwise keep at 0
-
+#set this to 0 if you have more than 15x coverage by long reads (Pacbio or Nanopore) or any other long reads/mate pairs (Illumina MP, Sanger, 454, etc)
 USE_LINKING_MATES = 0
-
-#specifies whether to run mega-reads correction on the grid
-
+#specifies whether to run the assembly on the grid
 USE_GRID=0
-
-#specifies queue to use when running on the grid MANDATORY
-
+#specifies grid engine to use SGE or SLURM
+GRID_ENGINE=SGE
+#specifies queue (for SGE) or partition (for SLURM) to use when running on the grid MANDATORY
 GRID_QUEUE=all.q
-
 #batch size in the amount of long read sequence for each batch on the grid
-
-GRID_BATCH_SIZE=300000000
-
-#coverage by the longest Long reads to use
-
-LHE_COVERAGE=30
-
+GRID_BATCH_SIZE=500000000
+#use at most this much coverage by the longest Pacbio or Nanopore reads, discard the rest of the reads
+#can increase this to 30 or 35 if your reads are short (N50<7000bp)
+LHE_COVERAGE=25
+#set to 0 (default) to do two passes of mega-reads for slower, but higher quality assembly, otherwise set to 1
+MEGA_READS_ONE_PASS=0
 #this parameter is useful if you have too many Illumina jumping library mates. Typically set it to 60 for bacteria and 300 for the other organisms 
-
 LIMIT_JUMP_COVERAGE = 300
-
 #these are the additional parameters to Celera Assembler.  do not worry about performance, number or processors or batch sizes -- these are computed automatically. 
-
-#set cgwErrorRate=0.25 for bacteria and 0.1<=cgwErrorRate<=0.15 for other organisms.
-
-CA_PARAMETERS =  cgwErrorRate=0.15 
-
-#minimum count k-mers used in error correction 1 means all k-mers are used.  one can increase to 2 if Illumina coverage >100
-
-KMER_COUNT_THRESHOLD = 1
-
-#whether to attempt to close gaps in scaffolds with Illumina data
-
+#CABOG ASSEMBLY ONLY: set cgwErrorRate=0.25 for bacteria and 0.1<=cgwErrorRate<=0.15 for other organisms.
+CA_PARAMETERS =  cgwErrorRate=0.15
+#CABOG ASSEMBLY ONLY: whether to attempt to close gaps in scaffolds with Illumina  or long read data
 CLOSE_GAPS=1
-
-#auto-detected number of cpus to use
-
+#auto-detected number of cpus to use, set this to the number of CPUs/threads per node you will be using
 NUM_THREADS = 16
-
-#this is mandatory jellyfish hash size -- a safe value is estimated_genome_size*estimated_coverage
-
+#this is mandatory jellyfish hash size -- a safe value is estimated_genome_size*20
 JF_SIZE = 200000000
-
-#set this to 1 to use SOAPdenovo contigging/scaffolding module.  Assembly will be worse but will run faster. Useful for very large (>5Gbp) genomes from Illumina-only data
-
+#ILLUMINA ONLY. Set this to 1 to use SOAPdenovo contigging/scaffolding module.  Assembly will be worse but will run faster. Useful for very large (>=8Gbp) genomes from Illumina-only data
 SOAP_ASSEMBLY=0
-
-END
+#Hybrid Illumina paired end + Nanopore/PacBio assembly ONLY.  Set this to 1 to use Flye assembler for final assembly of corrected mega-reads.  A lot faster than CABOG, at the expense of some contiguity. Works well even when MEGA_READS_ONE_PASS is set to 1.  DO NOT use if you have less than 15x coverage by long reads.
+FLYE_ASSEMBLY=0
+END 
 ```
-
-The config file consists of two sections: DATA and PARAMETERS. Each section concludes with END statement. User should copy the sample config file to the directory of choice for running the assembly and then modify it according to the specifications of the assembly project. Here are brief descriptions of the sections.
-
 DATA – in this section the user must specify the types of data available for the assembly. Each line represent a library and must start with PE=, JUMP= or OTHER= for the 3 different type of input read library (Paired Ends, Jumping or other). There can be multiple lines starting with `PE=` (or JUMP=), one line per library. PE and JUMP data must be in fastq format while the other data is in provided as a Celera Assembler frag format (`.frg`). Every PE or JUMP library is named by a unique two letter prefix. No two library can have the same prefix and a prefix should be made of two printable characters or number (no space or control characters), e.g. `aa`, `ZZ`, `l5`, or `J2`.
 
  The following types of data are supported:
@@ -212,11 +177,11 @@ By default, the assembler assumes that the jumping library pairs are “outties�
 
 `OTHER = data.frg`
 
-•	PacBio/MinION data are supported.  Note that you have to have 50x + coverage in Illumina Paired End reads to use PacBio of Oxford Nanopore MinION data.  Supply PacBio or MinION reads (cannot use both at the same time) in a single fasta file as:
+•	PacBio/MinION data are supported.  Note that you have to have 50x + coverage in Illumina Paired End reads to use PacBio of Oxford Nanopore MinION data.  Supply PacBio or MinION reads in a single fasta file as:
 
 `PACBIO=file.fa` or `NANOPORE=file.fa`
 
-More than one entry for each data type/set of files is allowed EXCEPT for PacBio/Nanopore data.  That is if you have several pairs of PE fastq files, specify each pair on a separate line with a different two-letter prefix.
+If you have both PacBio and Nanopore reads, cat them all into a single fasta file and supply them as "NANOPORE" type. More than one entry for each data type/set of files is allowed EXCEPT for PacBio/Nanopore data.  If you have several pairs of PE or JUMP fastq files, specify each pair on a separate line with a different two-letter prefix.  PACBIO or NANOPORE data must be in ONE file.
 
 PARAMETERS. The following parameters are mandatory:
 
