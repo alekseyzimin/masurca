@@ -50,7 +50,7 @@ The expected run times depend on the cpu speed/number of cores used for the asse
 
 # 2. Installation instructions
 
-To install, first download the latest distribution from the github release page https://github.com/alekseyzimin/masurca/releases.Then untar/unzip the package MaSuRCA-X.X.X.tgz, cd to the resulting folder and run `./install.sh`.  The installation script will configure and make all necessary packages.
+To install, first download the latest distribution from the github release page https://github.com/alekseyzimin/masurca/releases Then untar/unzip the package MaSuRCA-X.X.X.tgz, cd to the resulting folder and run `./install.sh`.  The installation script will configure and make all necessary packages.
 
 Only for developers:  you can clone the development tree, but then there are dependencies such as swig and yaggo (http://www.swig.org/ and https://github.com/gmarcais/yaggo) that must be available on the PATH:
 
