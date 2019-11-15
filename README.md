@@ -94,9 +94,11 @@ Please read all comments in the example configuration file before using MaSuRCA.
 # converted into Celera Assembler compatible .frg files (see
 # http://wgs-assembler.sourceforge.com)
 DATA
+#All sequence files can be gzipped
+#All illumina reads must be in fastq format
 #Illumina paired end reads supplied as <two-character prefix> <fragment mean> <fragment stdev> <forward_reads> <reverse_reads>
 #if single-end, do not specify <reverse_reads>
-#MUST HAVE Illumina paired end reads to use MaSuRCA
+#MUST HAVE Illumina paired end reads to use MaSuRCA.  
 PE= pe 500 50  /FULL_PATH/frag_1.fastq  /FULL_PATH/frag_2.fastq
 #Illumina mate pair reads supplied as <two-character prefix> <fragment mean> <fragment stdev> <forward_reads> <reverse_reads>
 JUMP= sh 3600 200  /FULL_PATH/short_1.fastq  /FULL_PATH/short_2.fastq
@@ -147,7 +149,8 @@ JF_SIZE = 200000000
 SOAP_ASSEMBLY=0
 #Hybrid Illumina paired end + Nanopore/PacBio assembly ONLY.  Set this to 1 to use Flye assembler for final assembly of corrected mega-reads.  A lot faster than CABOG, at the expense of some contiguity. Works well even when MEGA_READS_ONE_PASS is set to 1.  DO NOT use if you have less than 15x coverage by long reads.
 FLYE_ASSEMBLY=0
-END 
+END
+
 ```
 DATA – in this section the user must specify the types of data available for the assembly. Each line represent a library and must start with PE=, JUMP= or OTHER= for the 3 different type of input read library (Paired Ends, Jumping or other). There can be multiple lines starting with `PE=` (or JUMP=), one line per library. PE and JUMP data must be in fastq format while the other data is in provided as a Celera Assembler frag format (`.frg`). Every PE or JUMP library is named by a unique two letter prefix. No two library can have the same prefix and a prefix should be made of two printable characters or number (no space or control characters), e.g. `aa`, `ZZ`, `l5`, or `J2`.
 
@@ -161,7 +164,7 @@ example:
 
 `PE = aa 180 20 /data/fwd_reads.fastq /data/rev_reads.fastq`
 
-The `mean` and `stdev` parameters are the library insert average length and standard deviation. If the standard deviation is not known, set it to approximately 15% of the mean.If the second (reverse) read set is not available, do not specify it and just specify the forward reads.
+The `mean` and `stdev` parameters are the library insert average length and standard deviation. If the standard deviation is not known, set it to approximately 15% of the mean.If the second (reverse) read set is not available, do not specify it and just specify the forward reads.  Files must be in fastq format and can be gzipped.
 
 •	Illumina jumping/DiTag/other circularization protocol-based library mate pair reads:
 
@@ -177,7 +180,7 @@ By default, the assembler assumes that the jumping library pairs are “outties�
 
 `OTHER = data.frg`
 
-•	PacBio/MinION data are supported.  Note that you have to have 50x + coverage in Illumina Paired End reads to use PacBio of Oxford Nanopore MinION data.  Supply PacBio or MinION reads in a single fasta file as:
+•	PacBio/MinION data are supported.  Note that you have to have 50x + coverage in Illumina Paired End reads to use PacBio of Oxford Nanopore MinION data.  Supply PacBio or MinION reads in a single fasta or fastq file (can be gzipped) as:
 
 `PACBIO=file.fa` or `NANOPORE=file.fa`
 
