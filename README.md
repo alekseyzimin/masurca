@@ -22,6 +22,8 @@ Only Linux is supported (May or may not compile under gcc for MacOS or Cygwin, W
 
 •	SUSE Linux 16 and up
 
+WARNING:  installing MaSuRCA via Bioconda is not supported, and may result in broken installation due to conflicts with other packages, especially Mummer package.  If you get errors during assembly related to mummer.pm, remove the Bioconda from your path by editing your .bashrc. 
+
 ## Hardware requirements. 
 The hardware requirements vary with the size of the genome project.  Both Intel and AMD x64 architectures are supported. The general guidelines for hardware configuration are as follows:
 
