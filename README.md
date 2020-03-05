@@ -1,12 +1,14 @@
 # MaSuRCA Genome Assembly and Analysis Toolkit Quick Start Guide
 
-The MaSuRCA (Maryland Super Read Cabog Assembler) genome assembly and analysis toolkit consists of MaSuRCA genome assembler, QuORUM error corrector for Illumina data, POLCA genome polishing software, and MUMmer aligner.  The MaSuRCA assembler combines the benefits of deBruijn graph and Overlap-Layout-Consensus assembly approaches. Since version 3.2.1 it supports hybrid assembly with short Illumina reads and long high error PacBio/MinION data.
+The MaSuRCA (Maryland Super Read Cabog Assembler) genome assembly and analysis toolkit contains of MaSuRCA genome assembler, QuORUM error corrector for Illumina data, POLCA genome polishing software, Chromosome scaffolder, jellyfish mer counter, and MUMmer aligner.  The usage instructions for the additional tools that are exclusive to MaSuRCA, such as POLCA and Chromosome scaffolder are provided at the end of this Guide. 
+
+The MaSuRCA assembler combines the benefits of deBruijn graph and Overlap-Layout-Consensus assembly approaches. Since version 3.2.1 it supports hybrid assembly with short Illumina reads and long high error PacBio/MinION data.
 
 Citation for MaSuRCA: Zimin AV, Marçais G, Puiu D, Roberts M, Salzberg SL, Yorke JA. The MaSuRCA genome assembler. Bioinformatics. 2013 Nov 1;29(21):2669-77.
 
 Citation for MaSuRCA hybrid assembler: Zimin AV, Puiu D, Luo MC, Zhu T, Koren S, Yorke JA, Dvorak J, Salzberg S. Hybrid assembly of the large and highly repetitive genome of Aegilops tauschii, a progenitor of bread wheat, with the mega-reads algorithm. Genome Research. 2017 Jan 1:066100.
 
-# 1. System requirements/run rimes
+# 1. System requirements/run rimes for assembly
 
 ## Compile/Install requirements. 
 To compile the assembler we require gcc version 4.7 or newer to be installed on the system.
@@ -24,7 +26,7 @@ Only Linux is supported (May or may not compile under gcc for MacOS or Cygwin, W
 
 WARNING:  installing MaSuRCA via Bioconda is not supported, and may result in broken installation due to conflicts with other packages, especially Mummer package.  If you get errors during assembly related to mummer.pm, remove the Bioconda from your path by editing your .bashrc. 
 
-## Hardware requirements. 
+## Hardware requirement for assembly.
 The hardware requirements vary with the size of the genome project.  Both Intel and AMD x64 architectures are supported. The general guidelines for hardware configuration are as follows:
 
 •	Bacteria (up to 10Mb): 16Gb RAM, 8+ cores, 10Gb disk space
@@ -37,7 +39,7 @@ The hardware requirements vary with the size of the genome project.  Both Intel 
 
 •	Plant genomes (up to 30Gb): 1Tb RAM, 64+cores, 10Tb+ disk space
 
-## Expected run times. 
+## Expected assembly run times. 
 The expected run times depend on the cpu speed/number of cores used for the assembly and on the data used. The following lists the expected run times for the minimum configurations outlined above for Illumina-only data sets. Adding long reads (454, Sanger, etc. makes the assembly run about 50-100% longer:
 
 •	Bacteria (up to 10Mb): <1 hour
@@ -359,9 +361,21 @@ Example:
 
 polca.sh -a genome.fasta -r 'reads1.fastq reads2.fastq.gz' -t 16 -m 1G
 
-##Chromosome scaffolder
+## Chromosome scaffolder
 The chromosome scaffolder tools allows to scaffold the assembled contigs using (large) reference scaffolds or chromosome sequences from the same or closely related species. For example, you've assembled a novel human genome and you wish to create a new reference genome with contigs placed on the chromosomes. The chromosome scaffolder will let you do exactly that. It will examine your contigs to see if there are any misassemblies in places where the contigs disagree with the reference using read alignments.  The scaffolder will then break the contigs at all putative misassembled locations,  creating clean contigs (you can disable that optionally). Then it will order and orient the clean contigs onto the chromosomes using the reference alignments. The scaffolder can be invoked as:
 
-
+chromosome_scaffolder.sh
+-r <reference genome> MANDATORY
+-q <assembly to be scaffolded with the reference> MANDATORY
+-t <number of threads>
+-i <minimum sequence similarity percentage: default 97>
+-m <merge equence alignments slack: default 100000>
+-nb do not align reads to query contigs and do not attempt to break at misassemblies: default off
+-v <verbose>
+-s <reads to align to the assembly to check for misassemblies> MANDATORY unless -nb set
+-cl <coverage threshold for splitting at misassemblies: default 3>
+-ch <repeat coverage threshold for splitting at misassemblies: default 30>
+-M attempt to fill unaligned gaps with reference contigs: defalut off
+-h|-u|--help this message
 
 This tool is primarily designed for assemblies wigh good contiguity produced from long PacBio or Nanopore reads. The long reads (minimum 20x coverage) can be supplied with -s option. If you do not supply the lobg reads, you must set the -nb option which will skip splitting contigs and scaffold them as is. The -cl and -ch options set the coverage thresholds for splitting at suspect misassemblies, I recommend keeping -cl option at 3 and setting -ch option to about 1.5x the coverage of the long reads supplied with the -s option.
