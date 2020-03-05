@@ -63,14 +63,14 @@ git submodule update
 make
 ```
 
-# 3. Running the assembler
+# 3. Running the MaSuRCA assembler
 
 ## Overview. 
 The general steps to run the MaSuRCA assemblers are as follows, and will be covered in details in later sections. It is advised to create a new directory for each assembly project.
 
 In the rest of this document, `/install_path` refers to a path to the directory in which `./install.sh` was run.
 
-IMPORTANT! Do not use third party tools to pre-process the Illumina data before providing it to MaSuRCA, unless you are absolutely sure you know exactly what the preprocessing tool does.  Do not do any trimming, cleaning or error correction. This will likely deteriorate the assembly.
+IMPORTANT! Avoid using third party tools to pre-process the Illumina data before providing it to MaSuRCA, unless you are absolutely sure you know exactly what the preprocessing tool does.  Do not do any trimming, cleaning or error correction. This will likely deteriorate the assembly.
 
 First, create a configuration file which contains the location of the compiled assembler, the location of the data and some parameters. Copy in your assembly directory the template configuration file `/install_path/sr_config_example.txt` which was created by the installer with the correct paths to the freshly compiled software and with reasonable parameters. Many assembly projects should only need to set the path to the input data.
 
@@ -359,4 +359,9 @@ Example:
 
 polca.sh -a genome.fasta -r 'reads1.fastq reads2.fastq.gz' -t 16 -m 1G
 
+##Chromosome scaffolder
+The chromosome scaffolder tools allows to scaffold the assembled contigs using (large) reference scaffolds or chromosome sequences from the same or closely related species. For example, you've assembled a novel human genome and you wish to create a new reference genome with contigs placed on the chromosomes. The chromosome scaffolder will let you do exactly that. It will examine your contigs to see if there are any misassemblies in places where the contigs disagree with the reference using read alignments.  The scaffolder will then break the contigs at all putative misassembled locations,  creating clean contigs (you can disable that optionally). Then it will order and orient the clean contigs onto the chromosomes using the reference alignments. The scaffolder can be invoked as:
 
+
+
+This tool is primarily designed for assemblies wigh good contiguity produced from long PacBio or Nanopore reads. The long reads (minimum 20x coverage) can be supplied with -s option. If you do not supply the lobg reads, you must set the -nb option which will skip splitting contigs and scaffold them as is. The -cl and -ch options set the coverage thresholds for splitting at suspect misassemblies, I recommend keeping -cl option at 3 and setting -ch option to about 1.5x the coverage of the long reads supplied with the -s option.
