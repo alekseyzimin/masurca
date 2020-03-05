@@ -98,11 +98,9 @@ Please read all comments in the example configuration file before using MaSuRCA.
 # converted into Celera Assembler compatible .frg files (see
 # http://wgs-assembler.sourceforge.com)
 DATA
-#All sequence files can be gzipped
-#All illumina reads must be in fastq format
 #Illumina paired end reads supplied as <two-character prefix> <fragment mean> <fragment stdev> <forward_reads> <reverse_reads>
 #if single-end, do not specify <reverse_reads>
-#MUST HAVE Illumina paired end reads to use MaSuRCA.  
+#MUST HAVE Illumina paired end reads to use MaSuRCA
 PE= pe 500 50  /FULL_PATH/frag_1.fastq  /FULL_PATH/frag_2.fastq
 #Illumina mate pair reads supplied as <two-character prefix> <fragment mean> <fragment stdev> <forward_reads> <reverse_reads>
 JUMP= sh 3600 200  /FULL_PATH/short_1.fastq  /FULL_PATH/short_2.fastq
@@ -145,16 +143,20 @@ LIMIT_JUMP_COVERAGE = 300
 CA_PARAMETERS =  cgwErrorRate=0.15
 #CABOG ASSEMBLY ONLY: whether to attempt to close gaps in scaffolds with Illumina  or long read data
 CLOSE_GAPS=1
-#auto-detected number of cpus to use, set this to the number of CPUs/threads per node you will be using
+#number of cpus to use, set this to the number of CPUs/threads per node you will be using
 NUM_THREADS = 16
 #this is mandatory jellyfish hash size -- a safe value is estimated_genome_size*20
 JF_SIZE = 200000000
-#ILLUMINA ONLY. Set this to 1 to use SOAPdenovo contigging/scaffolding module.  Assembly will be worse but will run faster. Useful for very large (>=8Gbp) genomes from Illumina-only data
+#ILLUMINA ONLY. Set this to 1 to use SOAPdenovo contigging/scaffolding module.  
+#Assembly will be worse but will run faster. Useful for very large (>=8Gbp) genomes from Illumina-only data
 SOAP_ASSEMBLY=0
-#Hybrid Illumina paired end + Nanopore/PacBio assembly ONLY.  Set this to 1 to use Flye assembler for final assembly of corrected mega-reads.  A lot faster than CABOG, at the expense of some contiguity. Works well even when MEGA_READS_ONE_PASS is set to 1.  DO NOT use if you have less than 15x coverage by long reads.
+#If you are doing Hybrid Illumina paired end + Nanopore/PacBio assembly ONLY (no Illumina mate pairs or OTHER frg files).  
+#Set this to 1 to use Flye assembler for final assembly of corrected mega-reads.  
+#A lot faster than CABOG, AND QUALITY IS THE SAME OR BETTER. 
+#Works well even when MEGA_READS_ONE_PASS is set to 1.  
+#DO NOT use if you have less than 15x coverage by long reads.
 FLYE_ASSEMBLY=0
-END
-
+END 
 ```
 DATA – in this section the user must specify the types of data available for the assembly. Each line represent a library and must start with PE=, JUMP= or OTHER= for the 3 different type of input read library (Paired Ends, Jumping or other). There can be multiple lines starting with `PE=` (or JUMP=), one line per library. PE and JUMP data must be in fastq format while the other data is in provided as a Celera Assembler frag format (`.frg`). Every PE or JUMP library is named by a unique two letter prefix. No two library can have the same prefix and a prefix should be made of two printable characters or number (no space or control characters), e.g. `aa`, `ZZ`, `l5`, or `J2`.
 
