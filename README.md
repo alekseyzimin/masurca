@@ -363,6 +363,14 @@ Example:
 
 polca.sh -a genome.fasta -r 'reads1.fastq reads2.fastq.gz' -t 16 -m 1G
 
+POLCA also includes a tool to introduce random errors into an assembly.  This tool is primarily useful for testing the polishing techniques. It is also useful for aligning to genomes that have long exact repeats (such as GRCh38) with Nucmer without use of --maxmatch option. To use the tool, one must perform two steps.  First step is to generate a pseudo-VCF file with random errors by running:
+
+$ introduce_errors_fasta_file.pl sequence.fasta error_probability <optional:maximum_indel_size, default 20> > errors.evcf
+
+where sequence.fasta is the multi-fasta file of the original contigs/scaffolds, error_probability is a floating point number less than 1, equal to the probability of error per base. The last argument is optional, it specifies the maximum insertion/deletion size.  By defaul, the last argument is 20. 90% of the errors introduced are substitutions and 10% are insertions and deletions.  The rate of introduced errors is rougly equal to error_probability*(1+maximum_indel_size/20).  To introduce the errors to the sequence.fasta file, run:
+
+$ fix_consensus_from_vcf.pl sequence.fasta < errors.evcf > sequence_with_errors.fasta
+
 ## Chromosome scaffolder
 The chromosome scaffolder tools allows to scaffold the assembled contigs using (large) reference scaffolds or chromosome sequences from the same or closely related species. For example, you've assembled a novel human genome and you wish to create a new reference genome with contigs placed on the chromosomes. The chromosome scaffolder will let you do exactly that. It will examine your contigs to see if there are any misassemblies in places where the contigs disagree with the reference using read alignments.  The scaffolder will then break the contigs at all putative misassembled locations,  creating clean contigs (you can disable that optionally). Then it will order and orient the clean contigs onto the chromosomes using the reference alignments. The scaffolder can be invoked as:
 
