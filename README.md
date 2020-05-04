@@ -64,6 +64,10 @@ git submodule init
 git submodule update
 make
 ```
+Note that on some systems you may encounter a build error due to lack of xlocale.h file, because it was removed in glibc 2.26.  xlocale.h is used in Perl extension modules used by MaSuRCA.  To fix/work around this error, you can upgrade the Perl extensions, or create a symlink for xlocale.h to /etc/local.h or /usr/include/locale.h, e.g.:
+```
+ln -s /usr/include/locale.h /usr/include/xlocale.h
+```
 
 # 3. Running the MaSuRCA assembler
 
