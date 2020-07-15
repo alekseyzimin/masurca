@@ -8,6 +8,8 @@ Citation for MaSuRCA: Zimin AV, Marçais G, Puiu D, Roberts M, Salzberg SL, York
 
 Citation for MaSuRCA hybrid assembler: Zimin AV, Puiu D, Luo MC, Zhu T, Koren S, Yorke JA, Dvorak J, Salzberg S. Hybrid assembly of the large and highly repetitive genome of Aegilops tauschii, a progenitor of bread wheat, with the mega-reads algorithm. Genome Research. 2017 Jan 1:066100.
 
+This project is governed by the code of conduct at https://github.com/alekseyzimin/masurca/blob/master/code_of_conduct.md
+
 # 1. System requirements/run rimes for assembly
 
 ## Compile/Install requirements. 
