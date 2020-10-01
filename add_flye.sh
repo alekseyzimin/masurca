@@ -15,7 +15,7 @@ cp -r ../../Flye/* Flye
 cd Flye
 make clean
 cd ..
-grep Flye install.sh || echo "(cd Flye && make);" >> install.sh
+grep Flye install.sh || echo "(cd Flye && make && cp -a ../Flye \$DEST);" >> install.sh
 cd ../
 tar czf $MASURCA.tar.gz $MASURCA
 mv ../$MASURCA.tar.gz ../$MASURCA.tar.gz.bak
