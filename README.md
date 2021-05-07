@@ -80,7 +80,17 @@ In the rest of this document, `/install_path` refers to a path to the directory 
 
 IMPORTANT! Avoid using third party tools to pre-process the Illumina data before providing it to MaSuRCA, unless you are absolutely sure you know exactly what the preprocessing tool does.  Do not do any trimming, cleaning or error correction. This will likely deteriorate the assembly.
 
-First, create a configuration file which contains the location of the compiled assembler, the location of the data and some parameters. Copy in your assembly directory the template configuration file `/install_path/sr_config_example.txt` which was created by the installer with the correct paths to the freshly compiled software and with reasonable parameters. Many assembly projects should only need to set the path to the input data.
+There are two ways to run MaSuRCA.  For small projects that only use data from two Illumina sequencing fastq files representing forward and reverse reads from a paired end run, and (optionally) data from a long-read run such as Pacbio SMRT or Nanopore sequencing run in a single fasta/fastq file, one can use a simplified approach.  This runs the full version of the MaSuRCA assembly pipeline with default settings on a command line. The options are described in the usage message that is displayed by using -h or --help switch.  There are three command line switches, -i, -t and -r.  -t specifies the number of threads to use, -i specifies the names and paths to Illumina paired end reads files and -r specifies the name and the path to the long reads file.  For example:
+
+`/path_to_MaSuRCA/bin/masurca -t 32 -i /path_to/pe_R1.fa,/path_to/pe_R2.fa`
+
+will run assembly with only Illumina paired end reads from files /path_to/pe_R1.fa (forward) and /path_to/pe_R2.fa (reverse). An example of the hybrid assembly:
+
+`/path_to_MaSuRCA/bin/masurca -t 32 -i /path_to/pe_R1.fa,/path_to/pe_R2.fa -r /path_to/nanopore.fastq.gz`
+
+This command will run a hybrid assembly, correcting Nanopore reads with Illumina data first.  Ilumina paired end reads files must be fastq, can be gzipped, and Nanopore/PacBio data files for the -r option can be fasta or fastq and can be gzipped. 
+
+For bigger projects that use Ullimina data from multiple instrument runs, Illumina mate pairs, legacy Sanger data and/or need parameter adjustments, there is a more advanced mode. To use it, create a configuration file which contains the location of the compiled assembler, the location of the data and some parameters. Copy in your assembly directory the template configuration file `/install_path/sr_config_example.txt` which was created by the installer with the correct paths to the freshly compiled software and with reasonable parameters. Most assembly projects should only need to set the paths to the input data in the example configuration.  More detailed description of the configuration is in the next section.
 
 Second, run the `masurca` script which will generate from the configuration file a shell script `assemble.sh`. This last script is the main driver of the assembly.
 
