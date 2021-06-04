@@ -28,9 +28,15 @@ AC_SEARCH_LIBS([clock_gettime], [rt], [AC_DEFINE([HAVE_CLOCK_GETTIME], [1], [Def
 AC_SUBST([JELLYFISH2_0_CFLAGS], ['-I$(includedir)/jellyfish-1'])
 AC_SUBST([JELLYFISH2_0_LIBS], ['-L$(libdir) -ljellyfish-2.0'])
 AC_SUBST([JELLYFISH], ['$(bindir)/jellyfish'])
-#AC_CHECK_TYPE([__int128],
-#              [AC_DEFINE([HAVE_INT128], [1], [Define if type __int128 is supported])])
-
+AC_CHECK_TYPE([__int128],
+              [AC_DEFINE([HAVE_INT128], [1], [Define if type __int128 is supported])])
+              AC_MSG_CHECKING([for std::numeric_limits<__int128>])
+              AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <limits>
+                                                    template<bool> struct StaticAssert; template<> struct StaticAssert<true> { static void assert() { } };]],
+                                                  [[StaticAssert<std::numeric_limits<__int128>::is_specialized>::assert();]])],
+                                                  [AC_MSG_RESULT([yes])]
+                                                  [AC_DEFINE([HAVE_NUMERIC_LIMITS128], [1], [Define if numeric limits specialization exists for __int128])],
+                                                  [AC_MSG_RESULT([no])])
 # Check for openmp
 AC_ARG_ENABLE([openmp], [AS_HELP_STRING([--disable-openmp], [Disable OpenMP, even if available])])
 AS_IF([test "x$enable_openmp" != "xno"],
