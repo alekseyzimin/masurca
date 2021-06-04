@@ -28,8 +28,8 @@ AC_SEARCH_LIBS([clock_gettime], [rt], [AC_DEFINE([HAVE_CLOCK_GETTIME], [1], [Def
 AC_SUBST([JELLYFISH2_0_CFLAGS], ['-I$(includedir)/jellyfish-1'])
 AC_SUBST([JELLYFISH2_0_LIBS], ['-L$(libdir) -ljellyfish-2.0'])
 AC_SUBST([JELLYFISH], ['$(bindir)/jellyfish'])
-AC_CHECK_TYPE([__int128],
-              [AC_DEFINE([HAVE_INT128], [1], [Define if type __int128 is supported])])
+#AC_CHECK_TYPE([__int128],
+#              [AC_DEFINE([HAVE_INT128], [1], [Define if type __int128 is supported])])
 
 # Check for openmp
 AC_ARG_ENABLE([openmp], [AS_HELP_STRING([--disable-openmp], [Disable OpenMP, even if available])])
