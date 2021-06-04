@@ -19,5 +19,5 @@ LIBDIR=$DEST/lib
 export PKG_CONFIG_PATH=$LIBDIR/pkgconfig:$PKG_CONFIG_PATH
 (cd global-1 && ./configure --prefix=$DEST --bindir=$BINDIR --libdir=$LIBDIR && make -j $NUM_THREADS install-special)
 
-echo "creating sr_config_example.txt with correct PATHS"
-$BINDIR/masurca -g sr_config_example.txt
+echo "creating example config file masurca_config_example.txt"
+$BINDIR/masurca -g masurca_config_example.txt
