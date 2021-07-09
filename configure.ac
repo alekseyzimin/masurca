@@ -24,6 +24,23 @@ AC_SUBST([ALL_CXXFLAGS])
 AC_CHECK_LIB([pthread], [pthread_create])
 AC_SEARCH_LIBS([clock_gettime], [rt], [AC_DEFINE([HAVE_CLOCK_GETTIME], [1], [Define to 1 if you have the 'clock_gettime' function])])
 
+# Check that type __int128 is supported and if the
+# std::numeric_limits<__int128> specialization exists
+AC_ARG_WITH([int128],
+            [AS_HELP_STRING([--with-int128], [enable int128])],
+            [], [with_int128=yes])
+AS_IF([test "x$with_int128" != xno],
+      [AC_CHECK_TYPE([__int128],
+                     [AC_DEFINE([HAVE_INT128], [1], [Define if type __int128 is supported])])
+       AC_MSG_CHECKING([for std::numeric_limits<__int128>])
+       AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <limits>
+                                            template<bool> struct StaticAssert; template<> struct StaticAssert<true> { static void assert() { } };]],
+                                          [[StaticAssert<std::numeric_limits<__int128>::is_specialized>::assert();]])],
+                         [AC_MSG_RESULT([yes])]
+                         [AC_DEFINE([HAVE_NUMERIC_LIMITS128], [1], [Define if numeric limits specialization exists for __int128])],
+                         [AC_MSG_RESULT([no])])])
+
+
 # Flags for Jellyfish
 AC_SUBST([JELLYFISH2_0_CFLAGS], ['-I$(includedir)/jellyfish-1'])
 AC_SUBST([JELLYFISH2_0_LIBS], ['-L$(libdir) -ljellyfish-2.0'])
