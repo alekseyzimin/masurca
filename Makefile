@@ -1,6 +1,6 @@
 # MaSurCA version
 NAME=MaSuRCA
-VERSION = 4.0.5
+VERSION = 4.0.6
 NCPU = $(shell grep -c '^processor' /proc/cpuinfo 2>/dev/null || sysctl hw.ncpu 2>/dev/null || echo 1)
 
 # Component versions
@@ -37,7 +37,7 @@ $(BUILDDIR)/global: ./configure
 configure: configure.ac
 	autoreconf -fi
 
-SHORTCUTS =  Flye CA8 jellyfish PacBio prepare ufasta quorum SuperReads SOAPdenovo2 MUMmer
+SHORTCUTS =  Flye CA8 jellyfish PacBio prepare ufasta quorum SuperReads SOAPdenovo2 MUMmer eugene
 .PHONY: $(SHORTCUTS)
 $(SHORTCUTS):
 	$(MAKE) -C build/global/$@ install INSTALL="$(UPD_INSTALL)"

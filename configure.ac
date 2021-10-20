@@ -1,4 +1,4 @@
-AC_INIT([global], [1], [gmarcais@umd.edu])
+AC_INIT([global], [1], [alekseyz@jhu.edu])
 AC_CANONICAL_HOST
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([subdir-objects foreign parallel-tests color-tests])
@@ -176,6 +176,6 @@ AM_CONDITIONAL([RUBY_BINDING], [false])
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([jellyfish/jellyfish-2.0.pc])
 AC_CONFIG_FILES([MUMmer/mummer.pc])
-m4_map_args_w([samtools prepare ufasta quorum SuperReads SOAPdenovo2 PacBio CA8 jellyfish MUMmer],
+m4_map_args_w([samtools prepare ufasta quorum SuperReads SOAPdenovo2 PacBio CA8 jellyfish MUMmer eugene],
               [AC_CONFIG_FILES(], [/Makefile)])
 AC_OUTPUT
