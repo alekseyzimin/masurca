@@ -363,7 +363,7 @@ $/install_path/MaSuRCA-X.X.X/bin/masurca config.txt and execute  `assemble.sh`
 •	if error correction failed then remove the files named `??.cor.fa` and then run $/install_path/ MaSuRCA-X.X.X/bin/masurca config.txt and execute `assemble.sh`
 
 # Assembly result. 
-The final assembly scaffolds file is under CA/ or CA.mr...../ and named final.genome.scf.fasta. 
+The final assembly scaffolds file is under CA/{primary,alternative}.scf.fasta or CA.mr...../{primary,alternative}.scf.fasta if CABOG assembler was used for contigging/scaffolding, which is default, or flye.mr....../assembly.scaffolds.fasta if Flye was used for final contigging/scaffolding. 
 
 # 4. Additional tools
 ## POLCA
