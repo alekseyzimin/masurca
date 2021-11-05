@@ -28,7 +28,7 @@ Only Linux is supported (May or may not compile under gcc for MacOS or Cygwin, W
 
 WARNING:  installing MaSuRCA via Bioconda is not supported, and may result in broken installation due to conflicts with other packages, especially Mummer package.  If you get errors during assembly related to mummer.pm, remove the Bioconda from your path by editing your .bashrc. 
 
-## Hardware requirement for assembly.
+## Hardware requirements for assembly.
 The hardware requirements vary with the size of the genome project.  Both Intel and AMD x64 architectures are supported. The general guidelines for hardware configuration are as follows:
 
 •	Bacteria (up to 10Mb): 16Gb RAM, 8+ cores, 10Gb disk space
@@ -39,7 +39,7 @@ The hardware requirements vary with the size of the genome project.  Both Intel 
 
 •	Mammalian genomes (up to 3Gb): 512Gb RAM, 32+ cores, 5Tb disk space
 
-•	Plant genomes (up to 30Gb): 1Tb RAM, 64+cores, 10Tb+ disk space
+•	Plant genomes (up to 30Gb): 2Tb RAM, 64+cores, 10Tb+ disk space
 
 ## Expected assembly run times. 
 The expected run times depend on the cpu speed/number of cores used for the assembly and on the data used. The following lists the expected run times for the minimum configurations outlined above for Illumina-only data sets. Adding long reads (454, Sanger, etc. makes the assembly run about 50-100% longer:
@@ -363,7 +363,7 @@ $/install_path/MaSuRCA-X.X.X/bin/masurca config.txt and execute  `assemble.sh`
 •	if error correction failed then remove the files named `??.cor.fa` and then run $/install_path/ MaSuRCA-X.X.X/bin/masurca config.txt and execute `assemble.sh`
 
 # Assembly result. 
-The final assembly scaffolds file is under CA/ or CA.mr...../ and named final.genome.scf.fasta. 
+The final assembly scaffolds file is under CA/{primary,alternative}.scf.fasta or CA.mr...../{primary,alternative}.scf.fasta if CABOG assembler was used for contigging/scaffolding, which is default, or flye.mr....../assembly.scaffolds.fasta if Flye was used for final contigging/scaffolding. 
 
 # 4. Additional tools
 ## POLCA
@@ -390,7 +390,7 @@ $ fix_consensus_from_vcf.pl sequence.fasta < errors.evcf > sequence_with_errors.
 ## Chromosome scaffolder
 The chromosome scaffolder tools allows to scaffold the assembled contigs using (large) reference scaffolds or chromosome sequences from the same or closely related species. For example, you've assembled a novel human genome and you wish to create a new reference genome with contigs placed on the chromosomes. The chromosome scaffolder will let you do exactly that. It will examine your contigs to see if there are any misassemblies in places where the contigs disagree with the reference using read alignments.  The scaffolder will then break the contigs at all putative misassembled locations,  creating clean contigs (you can disable that optionally). Then it will order and orient the clean contigs onto the chromosomes using the reference alignments. The scaffolder can be invoked as:
 
-chromosome_scaffolder.sh
+chromosome_scaffolder.sh [options]
 -r <reference genome> MANDATORY
 -q <assembly to be scaffolded with the reference> MANDATORY
 -t <number of threads>
@@ -405,3 +405,32 @@ chromosome_scaffolder.sh
 -h|-u|--help this message
 
 This tool is primarily designed for assemblies wigh good contiguity produced from long PacBio or Nanopore reads. The long reads (minimum 20x coverage) can be supplied with -s option. If you do not supply the lobg reads, you must set the -nb option which will skip splitting contigs and scaffold them as is. The -cl and -ch options set the coverage thresholds for splitting at suspect misassemblies, I recommend keeping -cl option at 3 and setting -ch option to about 1.5x the coverage of the long reads supplied with the -s option.
+
+## SAMBA scaffolder
+SAMBA is a tool that is designed to scaffold and gap-fill existing genome assemblies with additional long-read data, resulting in substantially greater contiguity.  SAMBA is the only tool of its kind that also computes and fills in the sequence for all spanned gaps in the scaffolds, yielding much longer contigs. The invocation is as follows:
+
+samba.sh [options]
+-r <contigs or scaffolds in fasta format> 
+-q <long reads or another assembly used to scaffold in fasta format> 
+-t <number of threads> 
+-m <minimum matching length, default:5000> 
+-o <maximum overhang, default:1000> 
+-a <optional: allowed merges file in the format per line: contig1 contig2, only pairs of contigs listed will be considered for merging, useful for intrascaffold gap filling>
+-v verbose flag
+-h|--help|-u|--usage this message
+
+SAMBA installs with MaSuRCA and it has an external dependency on minimap2, that it uses to align long reads to the assembly.  minimap2 must be installed and available on the PATH. The only parameter that is worth mentioning is -m or the minimum matching length.  2500 is a good value for small eukaryotis genomes ~100Mb in size, 5000 is the default for mammalian genomes, and 9000-10000 is the optimal value for large plant genomes.  
+
+MaSuRCA also provides a wrapper script for SAMBA that allows to use SAMBA to close intra-scaffold gaps in an assembly. The usage is as follows:
+
+close_scaffold_gaps.sh [options]
+-r <scaffolds to gapclose> MANDATORY
+-q <gapclosing sequences, can be long reads> MANDATORY
+-t <number of threads, default:1>
+-i <identity% default:98>
+-m <minimum match length on the two sides of the gap default:2500>
+-o <max overhang default:1000>
+-v verbose flag
+-h|--help|-u|--usage this message
+
+The above script will split the scaffolds into contig and then run SAMBA only allowing intrascaffold gaps to be filled.  Contig "flips" inside the scaffold are allowed, making this a great tool to gapfill and fix assemblies scaffolded with HiC data, because HiC scaffolding sometimes incorrectly flips contigs in scaffolds.
