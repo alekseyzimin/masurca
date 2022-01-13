@@ -388,7 +388,7 @@ Usage:
 ```
 polca.sh [options]
 -a <assembly fasta file> 
--r <'Illumina_reads1.fastq Illumina_reads1.fastq'> 
+-r <'polishing _reads1.fastq polishing_reads2.fastq'> 
 -t <number of cpus> 
 -n <optional: do not fix errors, just call variants> 
 -m <optional: memory per thread to use in samtools sort>
