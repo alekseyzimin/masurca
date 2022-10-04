@@ -37,7 +37,7 @@ $(BUILDDIR)/global: ./configure
 configure: configure.ac
 	autoreconf -fi
 
-SHORTCUTS =  Flye CA8 jellyfish PacBio prepare ufasta quorum SuperReads SOAPdenovo2 MUMmer eugene
+SHORTCUTS =  Flye CA8 jellyfish PacBio prepare ufasta quorum SuperReads SOAPdenovo2 MUMmer eviann
 .PHONY: $(SHORTCUTS)
 $(SHORTCUTS):
 	$(MAKE) -C build/global/$@ install INSTALL="$(UPD_INSTALL)"
