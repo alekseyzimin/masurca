@@ -34,6 +34,3 @@
 [submodule "flye"]
         path = Flye
         url = https://github.com/alekseyzimin/flye.git
-[submodule "eugene"]
-	path = eugene
-	url = git@github.com:alekseyzimin/eugene.git
