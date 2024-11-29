@@ -424,7 +424,7 @@ chromosome_scaffolder.sh [options]
 -M attempt to fill unaligned gaps with reference contigs: defalut off
 -h|-u|--help this message
 ```
-This tool is primarily designed for assemblies wigh good contiguity produced from long PacBio or Nanopore reads. The long reads (minimum 20x coverage) can be supplied with -s option. If you do not supply the lobg reads, you must set the -nb option which will skip splitting contigs and scaffold them as is. The -cl and -ch options set the coverage thresholds for splitting at suspect misassemblies, I recommend keeping -cl option at 3 and setting -ch option to about 1.5x the coverage of the long reads supplied with the -s option.
+This tool is primarily designed for assemblies wigh good contiguity produced from long PacBio or Nanopore reads. The long reads (minimum 20x coverage) can be supplied with -s option. If you do not supply the long reads, you must set the -nb option which will skip splitting contigs and scaffold them as is. The -cl and -ch options set the coverage thresholds for splitting at suspect misassemblies, I recommend keeping -cl option at 3 and setting -ch option to about 1.5x the coverage of the long reads supplied with the -s option.
 
 ## SAMBA scaffolder
 SAMBA is a tool that is designed to scaffold and gap-fill existing genome assemblies with additional long-read data, resulting in substantially greater contiguity.  SAMBA is the only tool of its kind that also computes and fills in the sequence for all spanned gaps in the scaffolds, yielding much longer contigs. 
@@ -444,7 +444,7 @@ samba.sh [options]
 -v verbose flag
 -h|--help|-u|--usage this message
 ```
-SAMBA installs with MaSuRCA and requires no external dependencies. The only parameter that is worth modifying is -m or the minimum matching length.  2000-2500 is a good value for small eukaryotis genomes 100-400Mb in size, 5000 is the default best value for large eukaryotic genomes (2-3Gbp), and 9000-10000 is the best value for large highly repetitive plant genomes (5Gbp+).  
+SAMBA installs with MaSuRCA and requires no external dependencies. The only parameter that is worth modifying is -m or the minimum matching length.  2000-2500 is a good value for small eukaryotic genomes 100-400Mb in size, 5000 is the default best value for large eukaryotic genomes (2-3Gbp), and 9000-10000 is the best value for large highly repetitive plant genomes (5Gbp+).  
 
 MaSuRCA also provides a wrapper script for SAMBA that allows to use SAMBA to close intra-scaffold gaps in an assembly. The usage is as follows:
 ```
